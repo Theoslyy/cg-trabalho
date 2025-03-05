@@ -56,7 +56,7 @@ void Camera::draw_scene(SDL_Renderer* renderer, Scene scene) {
                     Vec3 idif = closest_intersection.shape->mat.k_diffuse * nl * light.intensity * closest_intersection.color;
                     Vec3 iesp = closest_intersection.shape->mat.k_specular * pow(rv, closest_intersection.shape->mat.e) * light.intensity * closest_intersection.color;
 
-                    ieye = ieye + idif + iesp;
+                    ieye += idif + iesp;
                 }
 
                 draw_pixel(renderer, col, row, ieye.clamp(0.0, 1.0).rgb_255());
