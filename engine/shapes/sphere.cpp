@@ -1,9 +1,9 @@
 #include "sphere.hpp"
 #include "../intersection.hpp"
 
-Sphere::Sphere () : center(Vec3(0.0, 0.0, 0.0)), radius(1.0), Shape() {}
+Sphere::Sphere () : Shape(), center(Vec3(0.0, 0.0, 0.0)), radius(1.0) {}
 
-Sphere::Sphere (Vec3 center, double radius, Material mat) : center(center), radius(radius), Shape(mat) {}
+Sphere::Sphere (Vec3 center, double radius, Material mat) : Shape(mat), center(center), radius(radius) {}
 
 const Intersection Sphere::get_intersection(Ray r) {
     Vec3 v = center - r.origin;

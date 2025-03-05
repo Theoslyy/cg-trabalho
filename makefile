@@ -2,7 +2,7 @@
 CXX = g++
 
 # Compiler flags
-CXXFLAGS = -O3 -march=native `sdl2-config --cflags`
+CXXFLAGS = -O3 -Wall -Wextra -march=native `sdl2-config --cflags`
 
 # Linker flags
 LDFLAGS = `sdl2-config --libs`

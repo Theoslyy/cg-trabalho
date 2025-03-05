@@ -3,6 +3,7 @@
 #include <chrono>
 #include <SDL.h>
 
+#include "SDL_keycode.h"
 #include "utils/vec3.hpp"
 #include "engine/camera.hpp"
 #include "engine/light.hpp"
@@ -75,7 +76,7 @@ int main() {
 
     // SDL init
     if (SDL_Init(SDL_INIT_VIDEO) != 0) { printf("SDL_Init Error: %s\n", SDL_GetError()); return 1; }
-    SDL_Window* window = SDL_CreateWindow("Hello SDL", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, image_width, image_height, 0);
+    SDL_Window* window = SDL_CreateWindow("Trabalho FInal - Computação Gráfica", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, image_width, image_height, 0);
     if (window == NULL) { printf("SDL_CreateWindow Error: %s\n", SDL_GetError()); SDL_Quit(); return 1; }
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if (renderer == NULL) { printf("SDL_CreateRenderer Error: %s\n", SDL_GetError()); SDL_DestroyWindow(window); SDL_Quit(); return 1; }
@@ -88,8 +89,12 @@ int main() {
     while (true) {
         // event handler
         while (SDL_PollEvent(&event) != 0) {
-            if (event.type == SDL_QUIT || (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)) {
-                goto quit;
+            if (event.type == SDL_QUIT) { goto quit; }
+            else if (event.type == SDL_KEYDOWN) {
+                switch (event.key.keysym.sym) {
+                    case SDLK_ESCAPE:
+                        goto quit;
+                }
             }
         }
 
@@ -108,8 +113,6 @@ int main() {
     }
     quit:
 
-    delete sphere;
-    // SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
 

@@ -14,4 +14,5 @@ class Shape {
         // T negativo se não há colisão positiva (objeto atrás do p0 do raio),
         // -INFINITO se não há colisão.
         virtual const Intersection get_intersection(Ray r) = 0;
+        virtual ~Shape() {} // Declare the destructor as virtual
 };
