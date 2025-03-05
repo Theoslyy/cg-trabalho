@@ -2,7 +2,6 @@
 #define VEC3_H
 
 #include <cmath>
-#include <stdexcept>
 using namespace std;
 
 inline double clip(double n, double lower, double upper) {
@@ -22,6 +21,8 @@ struct Vec3 {
 
     inline Vec3 operator*(const double other) const { return Vec3(x*other, y*other, z*other); }
 
+    inline void operator+=(const Vec3& other) { this->x += other.x; this->y += other.y; this->z += other.z; }
+
     inline friend Vec3 operator*(double scalar, const Vec3& other) { return Vec3(other.x*scalar, other.y*scalar, other.z*scalar); }
 
     inline Vec3 operator*(const Vec3& other) const { return Vec3(x*other.x, y*other.y, z*other.z); }
@@ -38,7 +39,7 @@ struct Vec3 {
 
     inline double magnitude() const { return sqrt(x*x + y*y + z*z); }
 
-    inline Vec3 normalize() const { return *this / magnitude(); }
+    inline Vec3 normalized() const { return *this / magnitude(); }
 
     inline Vec3 rgb_normalized() const { return Vec3(x/255.0, y/255.0, z/255.0); }
 

@@ -3,13 +3,13 @@
 #include <chrono>
 #include <SDL.h>
 
-#include "utils/vec3.h"
-#include "engine/camera.h"
-#include "engine/light.h"
-#include "engine/scene.h"
-#include "engine/shapes/material.h"
-#include "engine/shapes/sphere.h"
-#include "engine/shapes/plane.h"
+#include "utils/vec3.hpp"
+#include "engine/camera.hpp"
+#include "engine/light.hpp"
+#include "engine/scene.hpp"
+#include "engine/shapes/material.hpp"
+#include "engine/shapes/sphere.hpp"
+#include "engine/shapes/plane.hpp"
 
 
 using namespace std;
@@ -57,14 +57,9 @@ int main() {
     Plane* plane = new Plane(plane_p0, plane_normal, mat_p1);
     Plane* plane2 = new Plane(plane2_p0, plane2_normal, mat_p2);
 
-    Light light1 = Light(
+    Light light = Light(
         Vec3(-0.8, 0.8, 0.0),
-        Vec3(1.0, 0.0, 0.0),
-        0.7
-    );
-    Light light2 = Light(
-        Vec3(0.8, 0.8, 0.0),
-        Vec3(0.0, 0.0, 1.0),
+        Vec3(1.0, 1.0, 1.0),
         0.7
     );
 
@@ -76,8 +71,7 @@ int main() {
     scene.add_object(sphere);
     scene.add_object(plane);
     scene.add_object(plane2);
-    scene.add_light(light1);
-    scene.add_light(light2);
+    scene.add_light(light);
 
     // SDL init
     if (SDL_Init(SDL_INIT_VIDEO) != 0) { printf("SDL_Init Error: %s\n", SDL_GetError()); return 1; }
