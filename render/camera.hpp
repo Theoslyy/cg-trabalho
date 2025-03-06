@@ -5,27 +5,27 @@
 #include "scene.hpp"
 #include "../math/transform_matrix.hpp"
 
-enum ProjectionType {
-    PERSPECTIVE,
-    ORTOGRAPHIC,
-    OBLIQUE,
-};
 
 struct Frame {
-public:
+    public:
     Vec3 center, dx, dy, pse, p00;
     double width, height;
     int cols, rows;
-
+    
     Frame();
     Frame(Vec3 pos, double width, double height, double cols, double rows);
 };
 
 struct Camera {
-public:
+    enum ProjectionType {
+        PERSPECTIVE,
+        ORTOGRAPHIC,
+        OBLIQUE,
+    };
+    
+    public:
     Vec3 p_eye, bg_color, angle_oblique;
     Vec3 coord_system[3];
-    double frame_distance;
     ProjectionType projection_type;
     Frame frame;
     vector<Uint8> pixelBuffer;
@@ -40,6 +40,13 @@ public:
     void translate(Vec3 traslation_vector);
     void rotate(Vec3 rotation_axis, double angle);
     void transform(TransformationMatrix matrix);
+
+    void look_at(Vec3 point, Vec3 up);
+    void set_frame_size(double width, double height);
+    void set_frame_distance(double d);
+    double get_fov();
+    double set_fov(double fov);
+
 private:
     void draw_rows(Scene scene, int start, int end, Vec3 dx, Vec3 dy, Vec3 p00);
 };

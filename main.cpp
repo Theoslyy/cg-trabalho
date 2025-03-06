@@ -21,18 +21,22 @@
 
 using namespace std;
 
+double degreesToRadians(double degrees) {
+    return degrees * (M_PI / 180.0);
+}
+
 int main() {
-    Vec3 p0 = Vec3(0,0,0);
+    Vec3 p0 = Vec3(0,0,2);
     
     double aspect_ratio = 16.0/9.0;
-    double viewport_width = 3.2;
+    double viewport_width = 6.4;
     double viewport_height = viewport_width/aspect_ratio;
-    double viewport_distance = 1.0;
+    double viewport_distance = 2.0;
     int image_width = 960;
     int image_height = image_width/aspect_ratio;
 
     double sphere_radius = 1.0;
-    Vec3 sphere_center = Vec3(2.0,0, -(viewport_distance + sphere_radius));
+    Vec3 sphere_center = Vec3(2.0,0.0, -3.0);
 
     Vec3 plane_p0 = Vec3(0.0, -1.8, 0.0);
     Vec3 plane_normal = Vec3(0.0, 1.0, 0.0);
@@ -66,13 +70,27 @@ int main() {
     Cilinder* cilinder = new Cilinder(0.7, 2.0, Vec3(-2.0,-1,-3.0), Vec3(0.0,1.0,1.0), mat_sphere, true, true);
     Cone* cone = new Cone(1.0, 2.0, Vec3(0,-1,-3.0), Vec3(0.0,1.0,0.0), mat_sphere, true);
 
-    Light light = Light(
+    Light point_light = Light::point(
         Vec3(0.0, 3.8, 2.0),
         Vec3(1.0, 1.0, 1.0),
         0.7
     );
 
-    Vec3 ambient_light = Vec3(0.3, 0.3, 0.3);
+    Light spotlight = Light::spotlight(
+        Vec3(0.0, 3.8, -3.0),
+        Vec3(0.0, 1.0, 0.0),
+        degreesToRadians(45),
+        Vec3(1.0, 1.0, 1.0),
+        0.7
+    );
+
+    Light directional_light = Light::directional(
+        Vec3(0.0, 1.0, 0.0),
+        Vec3(1.0, 1.0, 1.0),
+        0.7
+    );
+
+    Vec3 ambient_light = Vec3(0.3, 0.3, 0.3); // propriedade da cena
 
     Camera camera = Camera(p0, viewport_width, viewport_height, image_width, image_height, viewport_distance, bg_color);
 
@@ -83,14 +101,12 @@ int main() {
     scene.add_object(plane);
     scene.add_object(plane2);
 
-    scene.add_light(&light);
+    scene.add_light(&spotlight);
 
     // SDL init
     SDL_Init(SDL_INIT_VIDEO);
     SDL_Window* window = SDL_CreateWindow("Trabalho FInal - Computação Gráfica", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, image_width, image_height, 0);
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     SDL_Surface* surface = SDL_GetWindowSurface(window);
-    
 
     // main loop
     SDL_Event event;
@@ -105,16 +121,16 @@ int main() {
                         goto quit;
                     // Movement
                     case SDLK_w:
-                        camera.translate(Vec3::AXIS_Z * -0.1);
+                        camera.translate(camera.coord_system[2] * -0.1);
                         break;
                     case SDLK_s:
-                        camera.translate(Vec3::AXIS_Z *  0.1);
+                        camera.translate(camera.coord_system[2] *  0.1);
                         break;
                     case SDLK_a:
-                        camera.translate(Vec3::AXIS_X * -0.1);
+                        camera.translate(camera.coord_system[0] * -0.1);
                         break;
                     case SDLK_d:
-                        camera.translate(Vec3::AXIS_X *  0.1);
+                        camera.translate(camera.coord_system[0] *  0.1);
                         break;
                     case SDLK_SPACE:
                         camera.translate(Vec3::AXIS_Y *  0.1);
@@ -140,6 +156,23 @@ int main() {
                         break;
                     case SDLK_e:
                         camera.rotate(camera.coord_system[2], -0.1);
+                        break;
+                    // FOV / distancia focal
+                    case SDLK_EQUALS:
+                        camera.set_frame_distance(-camera.frame.center.z - 0.01);
+                        break;
+                    case SDLK_MINUS:
+                        camera.set_frame_distance(-camera.frame.center.z + 0.01);
+                        break;
+                    // Projeções
+                    case SDLK_1:
+                        camera.projection_type = Camera::PERSPECTIVE; // muda a projeção pra perspectiva
+                        break;
+                    case SDLK_2:
+                        camera.projection_type = Camera::ORTOGRAPHIC; // muda a projeção pra ortografica
+                        break;
+                    case SDLK_3:
+                        camera.projection_type = Camera::OBLIQUE;     // muda a projeção pra obliqua
                         break;
                 }
             }

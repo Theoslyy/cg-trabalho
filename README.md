@@ -4,6 +4,3 @@ Como rodar:
 make
 make run
 ```
-
-
-
