@@ -1,25 +1,69 @@
 #include "camera.hpp"
+#include "SDL_stdinc.h"
+#include "SDL_surface.h"
 #include "intersection.hpp"
 #include "objects/object.hpp"
 #include <cmath>
 #include <cstdio>
+#include <vector>
+#include <thread>
+
+double clamp(double value, double min, double max) {
+    return (value < min) ? min : (value > max) ? max : value;
+}
 
 Camera::Camera() : p_eye(Vec3()), bg_color(Vec3(1.0, 1.0, 1.0)), frame(Frame()) {}
 
 Camera::Camera(Vec3 p_eye, double frame_width, double frame_height, double cols, double rows, double frame_distance, Vec3 bg_color) :
     p_eye(p_eye), bg_color(bg_color),
     coord_system{Vec3::AXIS_X, Vec3::AXIS_Y, Vec3::AXIS_Z},
-    frame(Frame(Vec3(p_eye.x, p_eye.y, p_eye.z - frame_distance), frame_width, frame_height, cols, rows)) {}
+    frame(Frame(Vec3(p_eye.x, p_eye.y, p_eye.z - frame_distance), frame_width, frame_height, cols, rows)),
+    pixelBuffer(cols * rows * 4) {}
 
-void Camera::draw_scene(SDL_Renderer* renderer, Scene scene) {
-    SDL_SetRenderDrawColor(renderer, bg_color.x, bg_color.y, bg_color.z, 1.0);
-    SDL_RenderClear(renderer);
 
+Vec3 Camera::world_to_camera(Vec3 point) {
+    Vec3 point_translated = point - this->p_eye;
+    Vec3 point_rotated = Vec3(
+        point_translated.dot(this->coord_system[0]),
+        point_translated.dot(this->coord_system[1]),
+        point_translated.dot(this->coord_system[2])
+    );
+    return point_rotated;
+}
+
+Vec3 Camera::camera_to_world(Vec3 point) {
+    Vec3 point_rotated = point.x * this->coord_system[0]
+        + point.y * this->coord_system[1]
+        + point.z * this->coord_system[2];
+    Vec3 point_translated = point_rotated + this->p_eye;
+    return point_translated;
+}
+
+void Camera::draw_scene(SDL_Surface* surface, Scene scene) {
     Vec3 dx = coord_system[0] * frame.dx.magnitude();
     Vec3 dy = coord_system[1] * frame.dy.magnitude();
-    Vec3 p00 = frame.p00; // TODO: world coords transformation
+    Vec3 p00 = camera_to_world(frame.p00); // TODO: world coords transformation
 
-    for (int row = 0; row < frame.rows; row++) { // linhas
+    vector<std::thread> threads;
+    int max_threads = std::thread::hardware_concurrency();
+    int rows_per_thread = frame.rows / max_threads;
+    
+    for (int i = 0; i < max_threads; ++i) {
+        int start = i * rows_per_thread;
+        int end = (i == max_threads - 1) ? frame.rows : start + rows_per_thread;
+        threads.emplace_back(&Camera::draw_rows, this, scene, start, end, dx, dy, p00);
+    }
+
+    for (auto& thread : threads) { thread.join(); }
+    
+    SDL_LockSurface(surface);
+    memcpy(surface->pixels, pixelBuffer.data(), pixelBuffer.size());
+    SDL_UnlockSurface(surface);
+}
+
+
+void Camera::draw_rows(Scene scene, int start, int end, Vec3 dx, Vec3 dy, Vec3 p00) {
+    for (int row = start; row < end; row++) { // linhas
         for (int col = 0; col < frame.cols; col++ ) { // colunas
             Vec3 dr = ((p00 + dx * col - dy * row) - p_eye).normalized();
             Ray r = Ray(p_eye, dr);
@@ -62,17 +106,18 @@ void Camera::draw_scene(SDL_Renderer* renderer, Scene scene) {
                     next_light:; // goto tag for skipping light calculation
                 }
 
-                draw_pixel(renderer, col, row, i_eye.clamp(0.0, 1.0).rgb_255());
+                pixelBuffer[row * frame.cols * 4 + col * 4] = (Uint8) clamp(i_eye.z * 255.0, 0, 255);     // B
+                pixelBuffer[row * frame.cols * 4 + col * 4 + 1] = (Uint8) clamp(i_eye.y * 255.0, 0, 255); // G
+                pixelBuffer[row * frame.cols * 4 + col * 4 + 2] = (Uint8) clamp(i_eye.x * 255.0, 0, 255); // R
+                pixelBuffer[row * frame.cols * 4 + col * 4 + 3] = (Uint8) 255; // A (sempre 255)
+                // draw_pixel(renderer, col, row, i_eye.clamp(0.0, 1.0).rgb_255());
             }
         }
     }
-
-    SDL_RenderPresent(renderer);
 }
 
-void Camera::draw_pixel(SDL_Renderer* renderer, int x, int y, Vec3 color) {
-    SDL_SetRenderDrawColor(renderer, color.x, color.y, color.z, 1.0);
-    SDL_RenderDrawPoint(renderer, x, y);
+void Camera::translate(Vec3 translation_vector) {
+    this->p_eye += translation_vector;
 }
 
 Frame::Frame() {
@@ -101,9 +146,3 @@ Frame::Frame(Vec3 pos, double width, double height, double cols, double rows) {
     this->cols = cols; this->rows = rows;      
 }
 
-void Camera::translate(Vec3 translation_vector) {
-    this->frame.center += translation_vector;
-    this->frame.p00 += translation_vector;
-    this->frame.pse += translation_vector;
-    this->p_eye += translation_vector;
-}

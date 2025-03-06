@@ -4,6 +4,8 @@
 #include <SDL.h>
 
 #include "SDL_keycode.h"
+#include "SDL_surface.h"
+#include "SDL_video.h"
 #include "math/vec3.hpp"
 #include "render/camera.hpp"
 #include "render/light.hpp"
@@ -84,11 +86,11 @@ int main() {
     scene.add_light(&light);
 
     // SDL init
-    if (SDL_Init(SDL_INIT_VIDEO) != 0) { printf("SDL_Init Error: %s\n", SDL_GetError()); return 1; }
+    SDL_Init(SDL_INIT_VIDEO);
     SDL_Window* window = SDL_CreateWindow("Trabalho FInal - Computação Gráfica", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, image_width, image_height, 0);
-    if (window == NULL) { printf("SDL_CreateWindow Error: %s\n", SDL_GetError()); SDL_Quit(); return 1; }
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-    if (renderer == NULL) { printf("SDL_CreateRenderer Error: %s\n", SDL_GetError()); SDL_DestroyWindow(window); SDL_Quit(); return 1; }
+    SDL_Surface* surface = SDL_GetWindowSurface(window);
+    
 
     // main loop
     SDL_Event event;
@@ -125,7 +127,8 @@ int main() {
         
         // draw sphere
         auto startTime = std::chrono::high_resolution_clock::now();
-        camera.draw_scene(renderer, scene);
+        camera.draw_scene(surface, scene);
+        SDL_UpdateWindowSurface(window);
         auto endTime = std::chrono::high_resolution_clock::now();
 
         // printa o FPS no terminal a cada 1s
