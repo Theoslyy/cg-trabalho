@@ -103,6 +103,7 @@ int main() {
                 switch (event.key.keysym.sym) {
                     case SDLK_ESCAPE:
                         goto quit;
+                    // Movement
                     case SDLK_w:
                         camera.translate(Vec3::AXIS_Z * -0.1);
                         break;
@@ -120,6 +121,25 @@ int main() {
                         break;
                     case SDLK_LSHIFT:
                         camera.translate(Vec3::AXIS_Y * -0.1);
+                        break;
+                    // Rotation
+                    case SDLK_LEFT:
+                        camera.rotate(Vec3::AXIS_Y, 0.1);
+                        break;
+                    case SDLK_RIGHT:
+                        camera.rotate(Vec3::AXIS_Y, -0.1);
+                        break;
+                    case SDLK_UP:
+                        camera.rotate(camera.coord_system[0], 0.1);
+                        break;
+                    case SDLK_DOWN:
+                        camera.rotate(camera.coord_system[0], -0.1);
+                        break;
+                    case SDLK_q:
+                        camera.rotate(camera.coord_system[2], 0.1);
+                        break;
+                    case SDLK_e:
+                        camera.rotate(camera.coord_system[2], -0.1);
                         break;
                 }
             }

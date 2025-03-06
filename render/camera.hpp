@@ -3,6 +3,7 @@
 #include <vector>
 #include "SDL_surface.h"
 #include "scene.hpp"
+#include "../math/transform_matrix.hpp"
 
 enum ProjectionType {
     PERSPECTIVE,
@@ -38,6 +39,7 @@ public:
     void set_position(Vec3 position);
     void translate(Vec3 traslation_vector);
     void rotate(Vec3 rotation_axis, double angle);
+    void transform(TransformationMatrix matrix);
 private:
     void draw_rows(Scene scene, int start, int end, Vec3 dx, Vec3 dy, Vec3 p00);
 };

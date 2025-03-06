@@ -20,7 +20,6 @@ Camera::Camera(Vec3 p_eye, double frame_width, double frame_height, double cols,
     frame(Frame(Vec3(p_eye.x, p_eye.y, p_eye.z - frame_distance), frame_width, frame_height, cols, rows)),
     pixelBuffer(cols * rows * 4) {}
 
-
 Vec3 Camera::world_to_camera(Vec3 point) {
     Vec3 point_translated = point - this->p_eye;
     Vec3 point_rotated = Vec3(
@@ -111,6 +110,11 @@ void Camera::draw_rows(Scene scene, int start, int end, Vec3 dx, Vec3 dy, Vec3 p
                 pixelBuffer[row * frame.cols * 4 + col * 4 + 2] = (Uint8) clamp(i_eye.x * 255.0, 0, 255); // R
                 pixelBuffer[row * frame.cols * 4 + col * 4 + 3] = (Uint8) 255; // A (sempre 255)
                 // draw_pixel(renderer, col, row, i_eye.clamp(0.0, 1.0).rgb_255());
+            } else {
+                pixelBuffer[row * frame.cols * 4 + col * 4] = (Uint8) bg_color.z;     // B
+                pixelBuffer[row * frame.cols * 4 + col * 4 + 1] = (Uint8) bg_color.y; // G
+                pixelBuffer[row * frame.cols * 4 + col * 4 + 2] = (Uint8) bg_color.x; // R
+                pixelBuffer[row * frame.cols * 4 + col * 4 + 3] = (Uint8) 255; // A (sempre 255)
             }
         }
     }
@@ -118,6 +122,13 @@ void Camera::draw_rows(Scene scene, int start, int end, Vec3 dx, Vec3 dy, Vec3 p
 
 void Camera::translate(Vec3 translation_vector) {
     this->p_eye += translation_vector;
+}
+
+void Camera::rotate(Vec3 rotation_axis, double angle) {
+    TransformationMatrix m = TransformationMatrix::rotation_around_axis(rotation_axis, angle);
+    for (int i = 0; i < 3; i++) {
+        coord_system[i] = m * coord_system[i];
+    }
 }
 
 Frame::Frame() {
