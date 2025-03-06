@@ -14,6 +14,12 @@ void Cilinder::translate(Vec3 translation_vector) {
     ct += translation_vector;
 }
 
+void Cilinder::transform(TransformationMatrix m) {
+    cb = m * cb;
+    ct = m * ct;
+    dc = (ct - cb).normalized();
+}
+
 const Intersection Cilinder::get_intersection(Ray ray) {
     Intersection closest_intersection = Intersection();
 
@@ -40,7 +46,6 @@ const Intersection Cilinder::get_intersection(Ray ray) {
             Vec3 cbe = q * cbp;
             // retorna só se a interseção está na região válida da superfície
             if (cbe.dot(dc) > 0.0 && cbe.magnitude() < height) {
-                // printf("t1\n");
                 closest_intersection = Intersection(t1, ray.at(t1), (m * cbp).normalized(), Vec3(1,1,1), this);
             }
         }
@@ -50,7 +55,6 @@ const Intersection Cilinder::get_intersection(Ray ray) {
             Vec3 cbe = q * cbp;
             // retorna só se a interseção está na região válida da superfície
             if (cbe.dot(dc) > 0.0 && cbe.magnitude() < height) {
-                // printf("t2\n");
                 closest_intersection = Intersection(t2, ray.at(t2), (m * cbp).normalized(), Vec3(1,1,1), this);
             }
         }

@@ -10,8 +10,9 @@ class Cone : public Object {
 public:
     Cone(double r, double h, Vec3 cb, Vec3 dc, Material mat, bool has_base);
     
-    void translate(Vec3 translation_vector);
     const Intersection get_intersection(Ray ray) override;
+    void translate(Vec3 translation_vector) override;
+    void transform(TransformationMatrix m) override;
 
 private:
     double radius;

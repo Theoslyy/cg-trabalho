@@ -10,4 +10,6 @@ class Sphere : public Object {
         Sphere (Vec3 center, double radius, Material mat);
         
         const Intersection get_intersection(Ray r) override;
+        void translate(Vec3 translation_vector) override;
+        void transform(TransformationMatrix m) override;
 };

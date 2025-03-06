@@ -5,6 +5,10 @@ Sphere::Sphere () : Object(), center(Vec3(0.0, 0.0, 0.0)), radius(1.0) {}
 
 Sphere::Sphere (Vec3 center, double radius, Material mat) : Object(mat), center(center), radius(radius) {}
 
+void Sphere::transform(TransformationMatrix m) {this->center = m * this->center;}
+
+void Sphere::translate(Vec3 translation_vector) { this->center += translation_vector; }
+
 const Intersection Sphere::get_intersection(Ray r) {
     Vec3 v = center - r.origin;
     double a = r.dr.dot(r.dr);

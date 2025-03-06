@@ -19,8 +19,9 @@ public:
 
     Cilinder();
     Cilinder(double radius, double height, Vec3 cb, Vec3 dc, Material mat, bool has_base, bool has_top);
-    void translate(Vec3 translation_vector);
-    const Intersection get_intersection(Ray r);
+    const Intersection get_intersection(Ray r) override;
+    void translate(Vec3 translation_vector) override;
+    void transform(TransformationMatrix m) override;
 };
 
 #endif // CILINDER_HPP

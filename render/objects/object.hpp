@@ -1,6 +1,7 @@
 #pragma once
 #include "material.hpp"
 #include "../ray.hpp"
+#include "../../math/transform_matrix.hpp"
 
 struct Intersection;
 
@@ -10,9 +11,9 @@ class Object {
         Object () : mat(Material()) {}
         Object (Material mat) : mat(mat) {}
         
-        // Retorna o menor T positivo da colisão do objeto com o raio, 
-        // T negativo se não há colisão positiva (objeto atrás do p0 do raio),
-        // -INFINITO se não há colisão.
+        // Retorna o menor T positivo + informações da colisão do objeto com o raio (INFINITO se não há colisão)
         virtual const Intersection get_intersection(Ray r) = 0;
         virtual ~Object() {} // Declare the destructor as virtual
+        virtual void translate(Vec3 translation_vector) = 0;
+        virtual void transform(TransformationMatrix m) = 0;
 };

@@ -13,6 +13,7 @@
 #include "render/light.hpp"
 #include "render/objects/cilinder.hpp"
 #include "render/objects/cone.hpp"
+#include "render/objects/mesh.hpp"
 #include "render/objects/object.hpp"
 #include "render/scene.hpp"
 #include "render/objects/material.hpp"
@@ -29,7 +30,7 @@ double degreesToRadians(double degrees) {
 }
 
 int main() {
-    Vec3 p0 = Vec3(0,0,2);
+    Vec3 p0 = Vec3(0,0,5);
     
     double aspect_ratio = 16.0/9.0;
     double viewport_width = 6.4;
@@ -72,6 +73,8 @@ int main() {
     Plane* plane2 = new Plane(plane2_p0, plane2_normal, mat_p2);
     Cilinder* cilinder = new Cilinder(0.7, 2.0, Vec3(-2.0,-1,-3.0), Vec3(0.0,1.0,1.0), mat_sphere, true, true);
     Cone* cone = new Cone(1.0, 2.0, Vec3(0,-1,-3.0), Vec3(0.0,1.0,0.0), mat_sphere, true);
+    Mesh* cube = Mesh::cube(mat_sphere);
+    // cube->translate(sphere_center);
 
     Light point_light = Light::point(
         Vec3(0.0, 3.8, 2.0),
@@ -99,10 +102,11 @@ int main() {
 
     Scene scene = Scene(ambient_light);
     scene.add_object(sphere);
-    scene.add_object(cilinder);
-    scene.add_object(cone);
-    scene.add_object(plane);
-    scene.add_object(plane2);
+    scene.add_object(cube);
+    // scene.add_object(cilinder);
+    // scene.add_object(cone);
+    // scene.add_object(plane);
+    // scene.add_object(plane2);
 
     scene.add_light(&spotlight);
 

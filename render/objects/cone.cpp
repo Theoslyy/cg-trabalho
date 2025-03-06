@@ -10,6 +10,12 @@ void Cone::translate(Vec3 translation_vector) {
     apex += translation_vector;
 }
 
+void Cone::transform(TransformationMatrix m) {
+    cb = m * cb;
+    apex = m * apex;
+    dc = (apex - cb).normalized();
+}
+
 const Intersection Cone::get_intersection(Ray ray) {
     Intersection closest_intersection = Intersection();
 
