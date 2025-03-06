@@ -4,15 +4,15 @@
 
 struct Intersection;
 
-class Shape {
+class Object {
     public:
         Material mat;
-        Shape () : mat(Material()) {}
-        Shape (Material mat) : mat(mat) {}
+        Object () : mat(Material()) {}
+        Object (Material mat) : mat(mat) {}
         
         // Retorna o menor T positivo da colisão do objeto com o raio, 
         // T negativo se não há colisão positiva (objeto atrás do p0 do raio),
         // -INFINITO se não há colisão.
         virtual const Intersection get_intersection(Ray r) = 0;
-        virtual ~Shape() {} // Declare the destructor as virtual
+        virtual ~Object() {} // Declare the destructor as virtual
 };

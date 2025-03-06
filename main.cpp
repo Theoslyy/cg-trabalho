@@ -4,13 +4,17 @@
 #include <SDL.h>
 
 #include "SDL_keycode.h"
-#include "utils/vec3.hpp"
-#include "engine/camera.hpp"
-#include "engine/light.hpp"
-#include "engine/scene.hpp"
-#include "engine/shapes/material.hpp"
-#include "engine/shapes/sphere.hpp"
-#include "engine/shapes/plane.hpp"
+#include "math/vec3.hpp"
+#include "render/camera.hpp"
+#include "render/light.hpp"
+#include "render/objects/cilinder.hpp"
+#include "render/objects/cone.hpp"
+#include "render/scene.hpp"
+#include "render/objects/material.hpp"
+#include "render/objects/sphere.hpp"
+#include "render/objects/plane.hpp"
+#include "render/objects/cilinder.hpp"
+#include "render/objects/cone.hpp"
 
 
 using namespace std;
@@ -57,9 +61,11 @@ int main() {
     Sphere* sphere = new Sphere(sphere_center, sphere_radius, mat_sphere);
     Plane* plane = new Plane(plane_p0, plane_normal, mat_p1);
     Plane* plane2 = new Plane(plane2_p0, plane2_normal, mat_p2);
+    Cilinder* cilinder = new Cilinder(1.0, 2.0, Vec3(0,-1,-3.0), Vec3(0.0,1.0,1.0), mat_sphere, true, false);
+    Cone* cone = new Cone(1.0, 2.0, Vec3(0,-1,-3.0), Vec3(0.0,1.0,0.0), mat_sphere, true);
 
     Light light = Light(
-        Vec3(-0.8, 0.8, 0.0),
+        Vec3(0.0, 3.8, 2.0),
         Vec3(1.0, 1.0, 1.0),
         0.7
     );
@@ -69,9 +75,12 @@ int main() {
     Camera camera = Camera(p0, viewport_width, viewport_height, image_width, image_height, viewport_distance, bg_color);
 
     Scene scene = Scene(ambient_light);
-    scene.add_object(sphere);
+    // scene.add_object(sphere);
+    // scene.add_object(cilinder);
+    scene.add_object(cone);
     scene.add_object(plane);
     scene.add_object(plane2);
+
     scene.add_light(light);
 
     // SDL init

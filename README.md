@@ -1,8 +1,8 @@
-# Port experimental em C++
-Fiz esse port em C++ pra comparar com Rust.\
-Como rodar (Linux):
+# Trabalho final de CG1
+Como rodar:
 ```
-make clean run
+make
+make run
 ```
 
 

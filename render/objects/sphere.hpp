@@ -1,8 +1,8 @@
 #pragma once
-#include "shape.hpp"
+#include "object.hpp"
 #include <cmath>
 
-class Sphere : public Shape {
+class Sphere : public Object {
     public:
         Vec3 center;
         double radius;

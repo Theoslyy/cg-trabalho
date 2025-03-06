@@ -1,5 +1,5 @@
 #pragma once
-#include "../utils/vec3.hpp"
+#include "../math/vec3.hpp"
 
 struct Light {
     Vec3 pos;

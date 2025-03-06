@@ -1,8 +1,8 @@
 #pragma once
-#include "shape.hpp"
+#include "object.hpp"
 #include <cmath>
 
-class Plane : public Shape {
+class Plane : public Object {
     public:
         Vec3 p0;
         Vec3 normal;
