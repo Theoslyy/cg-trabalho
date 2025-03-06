@@ -7,15 +7,21 @@
 Camera::Camera() : p_eye(Vec3()), bg_color(Vec3(1.0, 1.0, 1.0)), frame(Frame()) {}
 
 Camera::Camera(Vec3 p_eye, double frame_width, double frame_height, double cols, double rows, double frame_distance, Vec3 bg_color) :
-    p_eye(p_eye), bg_color(bg_color), frame(Frame(Vec3(p_eye.x, p_eye.y, p_eye.z - frame_distance), frame_width, frame_height, cols, rows)) {}
+    p_eye(p_eye), bg_color(bg_color),
+    coord_system{Vec3::AXIS_X, Vec3::AXIS_Y, Vec3::AXIS_Z},
+    frame(Frame(Vec3(p_eye.x, p_eye.y, p_eye.z - frame_distance), frame_width, frame_height, cols, rows)) {}
 
 void Camera::draw_scene(SDL_Renderer* renderer, Scene scene) {
     SDL_SetRenderDrawColor(renderer, bg_color.x, bg_color.y, bg_color.z, 1.0);
     SDL_RenderClear(renderer);
 
+    Vec3 dx = coord_system[0] * frame.dx.magnitude();
+    Vec3 dy = coord_system[1] * frame.dy.magnitude();
+    Vec3 p00 = frame.p00; // TODO: world coords transformation
+
     for (int row = 0; row < frame.rows; row++) { // linhas
         for (int col = 0; col < frame.cols; col++ ) { // colunas
-            Vec3 dr = ((frame.p00 + frame.dx * col - frame.dy * row) - p_eye).normalized();
+            Vec3 dr = ((p00 + dx * col - dy * row) - p_eye).normalized();
             Ray r = Ray(p_eye, dr);
             Intersection closest_intersection = scene.get_closest_intersection(r);
 
@@ -30,16 +36,16 @@ void Camera::draw_scene(SDL_Renderer* renderer, Scene scene) {
                 
                 // Calcula as iluminações
                 i_eye += i_ambient;
-                for (Light light : scene.lights) {
+                for (Light* light : scene.lights) {
                     // testa se algum objeto tá entre o observador e a fonte de luz
-                    Ray raio_luz = Ray(closest_intersection.p, light.pos - closest_intersection.p);
+                    Ray raio_luz = Ray(closest_intersection.p, light->pos - closest_intersection.p);
                     for (Object* obj : scene.objects) {
                         Intersection light_intersection = obj->get_intersection(raio_luz);
                         if (light_intersection.t >= 0.0001 && light_intersection.t <= 0.9999) { goto next_light; }
                     }
 
                     // calcula a cor pelo modelo de phong
-                    l = (light.pos - closest_intersection.p).normalized();
+                    l = (light->pos - closest_intersection.p).normalized();
                     n = closest_intersection.normal;
                     r = (2.0 * (l.dot(n)))*n - l;
                     v = -dr;
@@ -49,8 +55,8 @@ void Camera::draw_scene(SDL_Renderer* renderer, Scene scene) {
                     if (nl < 0.0) { nl = 0.0; }
                     if (rv < 0.0) { rv = 0.0; }
 
-                    i_diffuse = closest_intersection.shape->mat.k_diffuse * nl * light.intensity * closest_intersection.color;
-                    i_specular = closest_intersection.shape->mat.k_specular * pow(rv, closest_intersection.shape->mat.e) * light.intensity * closest_intersection.color;
+                    i_diffuse = closest_intersection.shape->mat.k_diffuse * nl * light->intensity * closest_intersection.color;
+                    i_specular = closest_intersection.shape->mat.k_specular * pow(rv, closest_intersection.shape->mat.e) * light->intensity * closest_intersection.color;
                     i_eye += i_diffuse + i_specular;
 
                     next_light:; // goto tag for skipping light calculation
@@ -93,4 +99,11 @@ Frame::Frame(Vec3 pos, double width, double height, double cols, double rows) {
     this->center = pos; this->dx = dx; this->dy = dy; this->pse = pse; this->p00 = p00;
     this->width = width; this->height = height;
     this->cols = cols; this->rows = rows;      
+}
+
+void Camera::translate(Vec3 translation_vector) {
+    this->frame.center += translation_vector;
+    this->frame.p00 += translation_vector;
+    this->frame.pse += translation_vector;
+    this->p_eye += translation_vector;
 }

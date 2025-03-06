@@ -15,10 +15,10 @@ public:
     Vec3 ct;
     Material material;
     bool has_base;
-    bool has_tampa;
+    bool has_top;
 
     Cilinder();
-    Cilinder(double radius, double height, Vec3 cb, Vec3 dc, Material mat, bool has_base, bool has_tampa);
+    Cilinder(double radius, double height, Vec3 cb, Vec3 dc, Material mat, bool has_base, bool has_top);
     void translate(Vec3 translation_vector);
     const Intersection get_intersection(Ray r);
 };

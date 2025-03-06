@@ -6,8 +6,8 @@
 #include "../../math/matrix3.hpp"
 #include <cstdio>
 
-Cilinder::Cilinder(double r, double h, Vec3 cb, Vec3 dc, Material mat, bool has_base, bool has_tampa) 
-    : Object(mat), radius(r), height(h), cb(cb), dc(dc.normalized()), ct(cb + h * dc.normalized()), has_base(has_base), has_tampa(has_tampa) {}
+Cilinder::Cilinder(double r, double h, Vec3 cb, Vec3 dc, Material mat, bool has_base, bool has_top) 
+    : Object(mat), radius(r), height(h), cb(cb), dc(dc.normalized()), ct(cb + h * dc.normalized()), has_base(has_base), has_top(has_top) {}
 
 void Cilinder::translate(Vec3 translation_vector) {
     cb += translation_vector;
@@ -57,7 +57,7 @@ const Intersection Cilinder::get_intersection(Ray ray) {
     }
 
     // Check plano do topo do cilindro
-    if (has_tampa) {
+    if (has_top) {
         double bottom = ray.dr.dot(dc);
         if (bottom != 0.0) {
             double t_tampa = -(ray.origin - ct).dot(dc) / bottom;

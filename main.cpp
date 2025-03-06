@@ -30,7 +30,7 @@ int main() {
     int image_height = image_width/aspect_ratio;
 
     double sphere_radius = 1.0;
-    Vec3 sphere_center = Vec3(0,0, -(viewport_distance + sphere_radius));
+    Vec3 sphere_center = Vec3(2.0,0, -(viewport_distance + sphere_radius));
 
     Vec3 plane_p0 = Vec3(0.0, -1.8, 0.0);
     Vec3 plane_normal = Vec3(0.0, 1.0, 0.0);
@@ -61,7 +61,7 @@ int main() {
     Sphere* sphere = new Sphere(sphere_center, sphere_radius, mat_sphere);
     Plane* plane = new Plane(plane_p0, plane_normal, mat_p1);
     Plane* plane2 = new Plane(plane2_p0, plane2_normal, mat_p2);
-    Cilinder* cilinder = new Cilinder(1.0, 2.0, Vec3(0,-1,-3.0), Vec3(0.0,1.0,1.0), mat_sphere, true, false);
+    Cilinder* cilinder = new Cilinder(0.7, 2.0, Vec3(-2.0,-1,-3.0), Vec3(0.0,1.0,1.0), mat_sphere, true, true);
     Cone* cone = new Cone(1.0, 2.0, Vec3(0,-1,-3.0), Vec3(0.0,1.0,0.0), mat_sphere, true);
 
     Light light = Light(
@@ -75,13 +75,13 @@ int main() {
     Camera camera = Camera(p0, viewport_width, viewport_height, image_width, image_height, viewport_distance, bg_color);
 
     Scene scene = Scene(ambient_light);
-    // scene.add_object(sphere);
-    // scene.add_object(cilinder);
+    scene.add_object(sphere);
+    scene.add_object(cilinder);
     scene.add_object(cone);
     scene.add_object(plane);
     scene.add_object(plane2);
 
-    scene.add_light(light);
+    scene.add_light(&light);
 
     // SDL init
     if (SDL_Init(SDL_INIT_VIDEO) != 0) { printf("SDL_Init Error: %s\n", SDL_GetError()); return 1; }
@@ -90,11 +90,9 @@ int main() {
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if (renderer == NULL) { printf("SDL_CreateRenderer Error: %s\n", SDL_GetError()); SDL_DestroyWindow(window); SDL_Quit(); return 1; }
 
-    // contador de fps
-    int frameCount = 0;
-    auto startTime = std::chrono::high_resolution_clock::now();
     // main loop
     SDL_Event event;
+    auto fpsTimer = std::chrono::high_resolution_clock::now();
     while (true) {
         // event handler
         while (SDL_PollEvent(&event) != 0) {
@@ -103,21 +101,39 @@ int main() {
                 switch (event.key.keysym.sym) {
                     case SDLK_ESCAPE:
                         goto quit;
+                    case SDLK_w:
+                        camera.translate(Vec3::AXIS_Z * -0.1);
+                        break;
+                    case SDLK_s:
+                        camera.translate(Vec3::AXIS_Z *  0.1);
+                        break;
+                    case SDLK_a:
+                        camera.translate(Vec3::AXIS_X * -0.1);
+                        break;
+                    case SDLK_d:
+                        camera.translate(Vec3::AXIS_X *  0.1);
+                        break;
+                    case SDLK_SPACE:
+                        camera.translate(Vec3::AXIS_Y *  0.1);
+                        break;
+                    case SDLK_LSHIFT:
+                        camera.translate(Vec3::AXIS_Y * -0.1);
+                        break;
                 }
             }
         }
-
+        
         // draw sphere
+        auto startTime = std::chrono::high_resolution_clock::now();
         camera.draw_scene(renderer, scene);
+        auto endTime = std::chrono::high_resolution_clock::now();
 
-        // printa o FPS no terminal
-        frameCount++;
-        auto currentTime = std::chrono::high_resolution_clock::now();
-        std::chrono::duration<double> elapsedTime = currentTime - startTime;
-        if (elapsedTime.count() >= 1.0) {
-            std::cout << "FPS: " << frameCount << std::endl;
-            frameCount = 0;
-            startTime = currentTime;
+        // printa o FPS no terminal a cada 1s
+        auto printTime = endTime - fpsTimer;
+        if (printTime >= std::chrono::seconds(1)) {
+            std::chrono::duration<double> lastFrameTime = endTime - startTime;
+            printf("FPS: %.1f | frame_time: %.2fs\n", 1.0/lastFrameTime.count(), lastFrameTime.count());
+            fpsTimer = std::chrono::high_resolution_clock::now(); // reseta o timer
         }
     }
     quit:
