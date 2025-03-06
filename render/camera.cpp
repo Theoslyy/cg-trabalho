@@ -131,6 +131,12 @@ void Camera::rotate(Vec3 rotation_axis, double angle) {
     }
 }
 
+void Camera::transform(TransformationMatrix matrix) {
+    for (int i = 0; i < 3; i++) {
+        coord_system[i] = matrix * coord_system[i];
+    }
+}
+
 Frame::Frame() {
     Vec3 pos = Vec3(0.0, 0.0, -1.0);
     double width = 1.0; double height = 1.0;
