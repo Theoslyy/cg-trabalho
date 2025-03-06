@@ -3,7 +3,9 @@
 #include <chrono>
 #include <SDL.h>
 
+#include "SDL_events.h"
 #include "SDL_keycode.h"
+#include "SDL_mouse.h"
 #include "SDL_surface.h"
 #include "SDL_video.h"
 #include "math/vec3.hpp"
@@ -11,6 +13,7 @@
 #include "render/light.hpp"
 #include "render/objects/cilinder.hpp"
 #include "render/objects/cone.hpp"
+#include "render/objects/object.hpp"
 #include "render/scene.hpp"
 #include "render/objects/material.hpp"
 #include "render/objects/sphere.hpp"
@@ -103,6 +106,8 @@ int main() {
 
     scene.add_light(&spotlight);
 
+    // camera.look_at(sphere_center, Vec3::AXIS_Y);
+
     // SDL init
     SDL_Init(SDL_INIT_VIDEO);
     SDL_Window* window = SDL_CreateWindow("Trabalho FInal - Computação Gráfica", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, image_width, image_height, 0);
@@ -114,8 +119,9 @@ int main() {
     while (true) {
         // event handler
         while (SDL_PollEvent(&event) != 0) {
-            if (event.type == SDL_QUIT) { goto quit; }
-            else if (event.type == SDL_KEYDOWN) {
+            if (event.type == SDL_QUIT) {
+                goto quit;
+            } else if (event.type == SDL_KEYDOWN) {
                 switch (event.key.keysym.sym) {
                     case SDLK_ESCAPE:
                         goto quit;
@@ -174,6 +180,14 @@ int main() {
                     case SDLK_3:
                         camera.projection_type = Camera::OBLIQUE;     // muda a projeção pra obliqua
                         break;
+                }
+            } else if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
+                int x = event.button.x;
+                int y = event.button.y;
+                Intersection i = camera.send_ray(scene, x, y);
+                if (i.t != INFINITY) {
+                    camera.look_at(i.p, Vec3::AXIS_Y); // olha pro ponto que o usuario clicou
+                    // scene.add_object(new Sphere(i.p, 0.25, mat_sphere)); // adiciona uma esfera onde o raio bateu
                 }
             }
         }

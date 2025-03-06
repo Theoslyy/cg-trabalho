@@ -2,6 +2,7 @@
 #include <SDL_render.h>
 #include <vector>
 #include "SDL_surface.h"
+#include "objects/object.hpp"
 #include "scene.hpp"
 #include "../math/transform_matrix.hpp"
 
@@ -46,6 +47,7 @@ struct Camera {
     void set_frame_distance(double d);
     double get_fov();
     double set_fov(double fov);
+    Intersection send_ray(Scene scene, int x, int y);
 
 private:
     void draw_rows(Scene scene, int start, int end, Vec3 dx, Vec3 dy, Vec3 p00);

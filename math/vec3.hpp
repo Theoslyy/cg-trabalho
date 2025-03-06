@@ -6,7 +6,7 @@
 using namespace std;
 
 inline double clip(double n, double lower, double upper) {
-  return std::max(lower, std::min(n, upper));
+  return std::fmax(lower, std::fmin(n, upper));
 }
 
 struct Matrix3;
@@ -57,10 +57,19 @@ struct Vec3 {
 
     inline Vec3 clamp(double min, double max) { return Vec3(clip(x, min, max), clip(y, min, max), clip(z, min, max)); }
 
+    inline Vec3 cross(const Vec3& other) const {
+      return Vec3(
+          y * other.z - z * other.y, // x-component
+          z * other.x - x * other.z, // y-component
+          x * other.y - y * other.x  // z-component
+      );
+    }
+
     Matrix3 projection_matrix() const;
 
     Matrix3 orth_projection_matrix() const;
 };
+
 
 inline const Vec3 Vec3::AXIS_X(1, 0, 0);
 inline const Vec3 Vec3::AXIS_Y(0, 1, 0);

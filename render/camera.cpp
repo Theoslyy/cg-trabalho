@@ -40,10 +40,37 @@ Vec3 Camera::camera_to_world(Vec3 point) {
     return point_translated;
 }
 
+Intersection Camera::send_ray(Scene scene, int x, int y) {
+    Vec3 dx = coord_system[0] * frame.dx.magnitude();
+    Vec3 dy = coord_system[1] * frame.dy.magnitude();
+    Vec3 p00 = camera_to_world(frame.p00);
+    Vec3 p_row_col = (p00 + dx * x - dy * y); // ponto x,y da janela
+    Vec3 dr;
+    Ray r;
+    switch (projection_type) {
+        case PERSPECTIVE:
+            dr = (p_row_col - p_eye).normalized();
+            r = Ray(p_eye, dr);
+            break;
+        case ORTOGRAPHIC:
+            dr = -coord_system[2]; // "eixo z"
+            r = Ray(p_row_col, dr);
+            break;
+        case OBLIQUE:
+            dr = -coord_system[2];
+            if (angle_oblique.x != 0.0) { dr = TransformationMatrix::rotation_around_axis(coord_system[0], angle_oblique.x) * dr; }
+            if (angle_oblique.y != 0.0) { dr = TransformationMatrix::rotation_around_axis(coord_system[1], angle_oblique.y) * dr; }
+            if (angle_oblique.y != 0.0) { dr = TransformationMatrix::rotation_around_axis(coord_system[2], angle_oblique.y) * dr; }
+            r = Ray(p_row_col, dr);
+            break;
+    }
+    return scene.get_closest_intersection(r);
+}
+
 void Camera::draw_scene(SDL_Surface* surface, Scene scene) {
     Vec3 dx = coord_system[0] * frame.dx.magnitude();
     Vec3 dy = coord_system[1] * frame.dy.magnitude();
-    Vec3 p00 = camera_to_world(frame.p00); // TODO: world coords transformation
+    Vec3 p00 = camera_to_world(frame.p00);
 
     vector<std::thread> threads;
     int max_threads = std::thread::hardware_concurrency();
@@ -177,9 +204,21 @@ void Camera::transform(TransformationMatrix matrix) {
 }
 
 
-// void Camera::look_at(Vec3 point, Vec3 up) {
-
-// };
+void Camera::look_at(Vec3 point, Vec3 up) {
+    // Calculate the forward direction (view direction)
+    Vec3 forward = (point - p_eye).normalized();
+    
+    // Calculate the right direction
+    Vec3 right = forward.cross(up).normalized();
+    
+    // Recalculate the up direction
+    Vec3 new_up = right.cross(forward).normalized();
+    
+    // Update the camera's coordinate system
+    coord_system[0] = right;  // X-axis
+    coord_system[1] = new_up;  // Y-axis
+    coord_system[2] = -forward; // Z-axis (inverted)
+}
 
 
 void Camera::set_frame_size(double width, double height) {
