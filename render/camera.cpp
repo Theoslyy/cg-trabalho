@@ -5,7 +5,6 @@
 #include "objects/object.hpp"
 #include <cmath>
 #include <cstdio>
-#include <vector>
 #include <thread>
 
 double clamp(double value, double min, double max) {
@@ -73,7 +72,7 @@ void Camera::draw_scene(SDL_Surface* surface, Scene scene) {
     Vec3 p00 = camera_to_world(frame.p00);
 
     vector<std::thread> threads;
-    int max_threads = std::thread::hardware_concurrency();
+    int max_threads = std::thread::hardware_concurrency() * 3;
     int rows_per_thread = frame.rows / max_threads;
     
     for (int i = 0; i < max_threads; ++i) {

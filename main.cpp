@@ -1,7 +1,9 @@
+#include <cstddef>
 #include <iostream>
 #include <cmath>
 #include <chrono>
 #include <SDL.h>
+#include <vector>
 
 #include "SDL_events.h"
 #include "SDL_keycode.h"
@@ -73,6 +75,18 @@ int main() {
     Plane* plane2 = new Plane(plane2_p0, plane2_normal, mat_p2);
     Cilinder* cilinder = new Cilinder(0.7, 2.0, Vec3(-2.0,-1,-3.0), Vec3(0.0,1.0,1.0), mat_sphere, true, true);
     Cone* cone = new Cone(1.0, 2.0, Vec3(0,-1,-3.0), Vec3(0.0,1.0,0.0), mat_sphere, true);
+
+    vector<Vec3> vertices = {
+        Vec3 (-0.5, 0.1, 0.0),
+        Vec3 ( 0.5, 0.1, 0.0),
+        Vec3 (0.0, 1.0, 0.0)
+    };
+
+    vector<array<size_t, 3>> triangles = {
+        {0, 1, 2}
+    };
+
+    // Mesh* cube = new Mesh(vertices, triangles, mat_sphere);
     Mesh* cube = Mesh::cube(mat_sphere);
     // cube->translate(sphere_center);
 
@@ -90,6 +104,7 @@ int main() {
         0.7
     );
 
+
     Light directional_light = Light::directional(
         Vec3(0.0, 1.0, 0.0),
         Vec3(1.0, 1.0, 1.0),
@@ -103,12 +118,12 @@ int main() {
     Scene scene = Scene(ambient_light);
     scene.add_object(sphere);
     scene.add_object(cube);
-    // scene.add_object(cilinder);
-    // scene.add_object(cone);
-    // scene.add_object(plane);
-    // scene.add_object(plane2);
+    scene.add_object(cilinder);
+    scene.add_object(cone);
+    scene.add_object(plane);
+    scene.add_object(plane2);
 
-    scene.add_light(&spotlight);
+    scene.add_light(&point_light);
 
     // camera.look_at(sphere_center, Vec3::AXIS_Y);
 
@@ -196,7 +211,6 @@ int main() {
             }
         }
         
-        // draw sphere
         auto startTime = std::chrono::high_resolution_clock::now();
         camera.draw_scene(surface, scene);
         SDL_UpdateWindowSurface(window);

@@ -1,6 +1,5 @@
 #pragma once
 #include <SDL_render.h>
-#include <vector>
 #include "SDL_surface.h"
 #include "objects/object.hpp"
 #include "scene.hpp"

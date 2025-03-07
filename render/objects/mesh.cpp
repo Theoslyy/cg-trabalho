@@ -2,11 +2,12 @@
 #include "object.hpp"
 #include <algorithm>
 #include <cmath>
+#include <cstddef>
 #include "../intersection.hpp"
 
 Mesh::Mesh (): Object(), vertices(), triangles() {};
 
-Mesh::Mesh (vector<Vec3> vertices, vector<array<Vec3*, 3>> triangles, Material mat): Object(mat), vertices(vertices), triangles(triangles) {
+Mesh::Mesh (vector<Vec3> vertices, vector<array<size_t, 3>> triangles, Material mat): Object(mat), vertices(vertices), triangles(triangles) {
     calculate_bounding_box();
 };
 
@@ -46,42 +47,19 @@ void Mesh::transform(TransformationMatrix m) {
 }
 
 const Intersection Mesh::get_intersection(Ray r) {
-    // Check if the ray intersects with the bounding box
-    if (!intersects_bounding_box(r)) {
-        return Intersection(); // No intersection with bounding box
-        printf("nao tem na caixa...\n");
-    }
-    // printf("tem na caixa...\n");
-
+    if (!intersects_bounding_box(r)) { return Intersection(); }
     Intersection closest_intersection;
-    double closest_t = INFINITY;
-
-    // Iterate through each triangle in the mesh
-    for (const auto& triangle : triangles) {
+    for (array<size_t, 3> triangle : this->triangles) {
+        Vec3 tn = triangle_normal(triangle);
+        if (tn.dot(r.dr) >= 0.0) { continue; } // backface culling
         Intersection triangle_intersection = intersects_triangle(r, triangle);
-        
-        // Check if the intersection is valid and closer than the previous closest
-        if (triangle_intersection.t > 1e-8 && triangle_intersection.t < closest_t) {
-            closest_t = triangle_intersection.t; // Update closest intersection
-            closest_intersection = triangle_intersection; // Store the closest intersection
+        if (triangle_intersection.t < closest_intersection.t) {
+            closest_intersection = triangle_intersection;
         }
     }
-
-    // If a valid intersection was found, return it
-    if (closest_t < INFINITY) {
-        return closest_intersection; // Return the closest intersection found
-    } else {
-        return Intersection(); // Return an empty intersection if none found
-    }
+    return closest_intersection;
 }
 
-
-
-Vec3 Mesh::triangle_normal(array<Vec3*, 3> triangle) {
-    Vec3 edge1 = *triangle[1] - *triangle[0];
-    Vec3 edge2 = *triangle[2] - *triangle[0];
-    return edge1.cross(edge2).normalized();
-}
 
 bool Mesh::intersects_bounding_box(Ray r) {
     double t_min_x = (bounding_box_vmin.x - r.origin.x) / r.dr.x;
@@ -112,43 +90,61 @@ bool Mesh::intersects_bounding_box(Ray r) {
 }
 
 
-Intersection Mesh::intersects_triangle(Ray r, std::array<Vec3*, 3> triangle) {
-    Vec3 v0 = *triangle[0];
-    Vec3 v1 = *triangle[1];
-    Vec3 v2 = *triangle[2];
+Vec3 Mesh::triangle_normal(array<size_t, 3> triangle) {
+    Vec3 edge1 = this->vertices[triangle[1]] - this->vertices[triangle[0]];
+    Vec3 edge2 = this->vertices[triangle[2]] - this->vertices[triangle[0]];
+    return edge1.cross(edge2).normalized();
+}
 
+
+Intersection Mesh::intersects_triangle(Ray r, array<size_t, 3> triangle) {
+    // Get the vertices of the triangle
+    Vec3 v0 = vertices[triangle[0]];
+    Vec3 v1 = vertices[triangle[1]];
+    Vec3 v2 = vertices[triangle[2]];
+
+    // Calculate the edges of the triangle
     Vec3 edge1 = v1 - v0;
     Vec3 edge2 = v2 - v0;
+
+    // Calculate the determinant
     Vec3 h = r.dr.cross(edge2);
     double a = edge1.dot(h);
 
+    // If the determinant is near zero, the ray lies in the plane of the triangle
     if (a > -1e-8 && a < 1e-8) {
-        return Intersection(); // Ray is parallel to triangle
+        return Intersection(); // No intersection
     }
 
-    double f = 1.0 / a;
+    // Calculate the distance from v0 to the ray origin
     Vec3 s = r.origin - v0;
-    double u = f * s.dot(h);
+    double u = s.dot(h) / a;
 
+    // Check if the intersection is outside the triangle
     if (u < 0.0 || u > 1.0) {
-        return Intersection(); // Outside triangle
+        return Intersection(); // No intersection
     }
 
+    // Prepare to test the v parameter
     Vec3 q = s.cross(edge1);
-    double v = f * r.dr.dot(q);
+    double v = r.dr.dot(q) / a;
 
+    // Check if the intersection is outside the triangle
     if (v < 0.0 || u + v > 1.0) {
-        return Intersection(); // Outside triangle
+        return Intersection(); // No intersection
     }
 
-    // Calculate t for intersection point
-    double t = f * edge2.dot(q);
-    if (t >= 0) {
-        return Intersection(t, r.at(t), triangle_normal(triangle), Vec3(1, 1, 1), this); // Return intersection
-    } else {
-        return Intersection(); // Intersection is behind the ray
+    // Calculate t to find the intersection point
+    double t = edge2.dot(q) / a;
+
+    // If t is positive, the ray intersects the triangle
+    if (t > 1e-8) {
+        return Intersection(t, r.at(t), triangle_normal(triangle), Vec3(1,1,1), this);
     }
+
+    return Intersection(); // No intersection
 }
+
 
 
 Mesh* Mesh::cube(Material material) {
@@ -165,19 +161,19 @@ Mesh* Mesh::cube(Material material) {
     };
 
     // Triangles defined by indices of the vertices
-    vector<array<Vec3*, 3>> triangles = {
+    vector<array<size_t, 3>> triangles = {
         // Back face
-        {&vertices[2], &vertices[1], &vertices[0]}, {&vertices[1], &vertices[2], &vertices[3]},
+        {2, 1, 0}, {1, 2, 3},
         // Left face
-        {&vertices[6], &vertices[2], &vertices[0]}, {&vertices[6], &vertices[0], &vertices[4]},
+        {6, 2, 0}, {6, 0, 4},
         // Right face
-        {&vertices[3], &vertices[5], &vertices[1]}, {&vertices[3], &vertices[7], &vertices[5]},
+        {3, 5, 1}, {3, 7, 5},
         // Front face
-        {&vertices[4], &vertices[5], &vertices[6]}, {&vertices[7], &vertices[6], &vertices[5]},
+        {4, 5, 6}, {7, 6, 5},
         // Top face
-        {&vertices[6], &vertices[3], &vertices[2]}, {&vertices[6], &vertices[7], &vertices[3]},
+        {6, 3, 2}, {6, 7, 3},
         // Bottom face
-        {&vertices[0], &vertices[1], &vertices[5]}, {&vertices[0], &vertices[5], &vertices[4]},
+        {0, 1, 5}, {0, 5, 4},
     };
 
     return new Mesh(vertices, triangles, material);
