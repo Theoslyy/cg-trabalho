@@ -1,7 +1,7 @@
 # Compiler
 CXX = g++
 CXXFLAGS = -O3 -Wall -Wextra -march=native `sdl2-config --cflags`
-LDFLAGS = `sdl2-config --libs`
+LDFLAGS = `sdl2-config --libs` -lSDL2_image
 
 # Object and binary directories
 OBJ_DIR = obj

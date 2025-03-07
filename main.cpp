@@ -1,9 +1,7 @@
 #include <cstddef>
-#include <iostream>
 #include <cmath>
 #include <chrono>
 #include <SDL.h>
-#include <vector>
 
 #include "SDL_events.h"
 #include "SDL_keycode.h"
@@ -24,6 +22,7 @@
 #include "render/objects/plane.hpp"
 #include "render/objects/cilinder.hpp"
 #include "render/objects/cone.hpp"
+#include "render/texture.hpp"
 
 
 using namespace std;
@@ -70,9 +69,18 @@ int main() {
         Vec3(0.0, 0.0, 0.0),
         1
     );
+    Material mat_white = Material(
+        Vec3(0.8, 0.8, 0.8),
+        Vec3(0.8, 0.8, 0.8),
+        Vec3(0.8, 0.8, 0.8),
+        10
+    );
 
-    Sphere* sphere = new Sphere(sphere_center, sphere_radius, mat_sphere);
-    Plane* plane = new Plane(plane_p0, plane_normal, mat_p1);
+    Texture beach_ball = Texture("beach_ball.png");
+    Texture uv_test = Texture("bw.png");
+
+    Sphere* sphere = new Sphere(sphere_center, sphere_radius, mat_white, &beach_ball);
+    Plane* plane = new Plane(plane_p0, plane_normal, mat_white, &uv_test, 4, 4);
     Plane* plane2 = new Plane(plane2_p0, plane2_normal, mat_p2);
     Cilinder* cilinder = new Cilinder(0.7, 2.0, Vec3(-2.0,-1,-3.0), Vec3(0.0,1.0,1.0), mat_sphere, true, true);
     Cone* cone = new Cone(1.0, 2.0, Vec3(0,-1,-3.0), Vec3(0.0,1.0,0.0), mat_sphere, true);
@@ -88,17 +96,18 @@ int main() {
     };
 
     // Mesh* cube = new Mesh(vertices, triangles, mat_sphere);
-    // Mesh* cube = Mesh::cube(mat_sphere);
-    Mesh* cube = new Mesh("teapot400.obj", mat_sphere);
-    cube->transform(
-        TransformationMatrix::scale_matrix(0.25, 0.25, 0.25)
-        * TransformationMatrix::rotation_around_axis(Vec3::AXIS_Y, M_PI/2.0)
+    Mesh* cube = Mesh::cube(mat_sphere);
+    cube->translate(Vec3(-0.0,-1.0,0));
+    // Mesh* cube = new Mesh("teapot400.obj", mat_sphere);
+    cube->transform( // transforma num retangulinho girado
+        TransformationMatrix::rotation_around_axis(Vec3::AXIS_Y, M_PI/4.0)
+        * TransformationMatrix::scale_matrix(2.0, 0.5, 0.5) 
     );
 
     Light point_light = Light::point(
         Vec3(0.0, 3.8, 2.0),
         Vec3(1.0, 1.0, 1.0),
-        0.7
+        1.0
     );
 
     Light spotlight = Light::spotlight(
@@ -106,14 +115,14 @@ int main() {
         Vec3(0.0, 1.0, 0.0),
         degreesToRadians(45),
         Vec3(1.0, 1.0, 1.0),
-        0.7
+        1.0
     );
 
 
     Light directional_light = Light::directional(
         Vec3(0.0, 1.0, 0.0),
         Vec3(1.0, 1.0, 1.0),
-        0.7
+        1.0
     );
 
     Vec3 ambient_light = Vec3(0.3, 0.3, 0.3); // propriedade da cena

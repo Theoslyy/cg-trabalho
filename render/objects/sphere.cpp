@@ -1,9 +1,15 @@
 #include "sphere.hpp"
 #include "../intersection.hpp"
+#include <cmath>
 
-Sphere::Sphere () : Object(), center(Vec3(0.0, 0.0, 0.0)), radius(1.0) {}
+Sphere::Sphere () :
+    Object(), center(Vec3(0.0, 0.0, 0.0)), radius(1.0) {}
 
-Sphere::Sphere (Vec3 center, double radius, Material mat) : Object(mat), center(center), radius(radius) {}
+Sphere::Sphere (Vec3 center, double radius, Material mat) :
+    Object(mat), center(center), radius(radius), has_texture(false) {}
+
+Sphere::Sphere (Vec3 center, double radius, Material mat, Texture* texture) :
+    Object(mat), center(center), radius(radius), has_texture(true), texture(texture) {}
 
 void Sphere::transform(TransformationMatrix m) {this->center = m * this->center;}
 
@@ -23,7 +29,15 @@ const Intersection Sphere::get_intersection(Ray r) {
         double min_t = (t1 < t2 || t2 < 0.0) ? t1 : t2;
         Vec3 p = r.at(min_t);
         Vec3 normal = (p - center).normalized();
-        return Intersection(min_t, p, normal, Vec3(1,1,1), this);
+        Vec3 color(1,1,1);
+
+        if (has_texture) {
+            double u = 0.5 + ((atan2(normal.z, normal.x) - M_PI/2.0) / (2.0 * -M_PI));
+            double v = 0.5 - (asin(normal.y) / M_PI);
+            color = texture->sample(u, v);
+        }
+
+        return Intersection(min_t, p, normal, color, this);
     } else {
         return Intersection();
     }

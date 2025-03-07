@@ -116,7 +116,7 @@ void Camera::draw_rows(Scene scene, int start, int end, Vec3 dx, Vec3 dy, Vec3 p
             // checa se a interseção existe e não está atrás da câmera
             if (closest_intersection.t != INFINITY && closest_intersection.t > 0.0) {
                 Vec3 i_eye = Vec3(0.0, 0.0, 0.0);
-                Vec3 i_ambient = closest_intersection.shape->mat.k_ambient * scene.ambient_light;
+                Vec3 i_ambient = closest_intersection.shape->mat.k_ambient * closest_intersection.color * scene.ambient_light;
                 Vec3 i_diffuse;
                 Vec3 i_specular;
                 Vec3 l, n, r, v;
