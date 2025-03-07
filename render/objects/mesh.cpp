@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
+#include <fstream>
+#include <sstream>
 #include "../intersection.hpp"
 
 Mesh::Mesh (): Object(), vertices(), triangles() {};
@@ -11,9 +13,35 @@ Mesh::Mesh (vector<Vec3> vertices, vector<array<size_t, 3>> triangles, Material 
     calculate_bounding_box();
 };
 
-// Mesh::Mesh (string obj_filename) {
+Mesh::Mesh(string obj_filename, Material mat) : Object(mat) {
+    std::ifstream file(obj_filename);
 
-// };
+    std::string line;
+    while (std::getline(file, line)) {
+        std::istringstream iss(line);
+        std::string prefix;
+        iss >> prefix;
+
+        if (prefix == "v") { // Vertex
+            Vec3 vertex;
+            iss >> vertex.x >> vertex.y >> vertex.z;
+            vertices.push_back(vertex);
+        } else if (prefix == "f") { // Face
+            size_t vertexIndex[3];
+            for (int i = 0; i < 3; ++i) {
+                iss >> vertexIndex[i];
+                vertexIndex[i]--; // OBJ indices are 1-based, convert to 0-based
+                if (iss.peek() == '/') {
+                    iss.ignore(256, ' '); // Ignore texture and normal indices
+                }
+            }
+            triangles.push_back({vertexIndex[0], vertexIndex[1], vertexIndex[2]});
+        }
+    }
+
+    file.close();
+    calculate_bounding_box(); // Calculate the bounding box after loading the mesh
+}
 
 void Mesh::calculate_bounding_box() {
     Vec3 min_v = Vec3(INFINITY, INFINITY, INFINITY);

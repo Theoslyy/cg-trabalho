@@ -10,6 +10,7 @@
 #include "SDL_mouse.h"
 #include "SDL_surface.h"
 #include "SDL_video.h"
+#include "math/transform_matrix.hpp"
 #include "math/vec3.hpp"
 #include "render/camera.hpp"
 #include "render/light.hpp"
@@ -87,8 +88,12 @@ int main() {
     };
 
     // Mesh* cube = new Mesh(vertices, triangles, mat_sphere);
-    Mesh* cube = Mesh::cube(mat_sphere);
-    // cube->translate(sphere_center);
+    // Mesh* cube = Mesh::cube(mat_sphere);
+    Mesh* cube = new Mesh("teapot400.obj", mat_sphere);
+    cube->transform(
+        TransformationMatrix::scale_matrix(0.25, 0.25, 0.25)
+        * TransformationMatrix::rotation_around_axis(Vec3::AXIS_Y, M_PI/2.0)
+    );
 
     Light point_light = Light::point(
         Vec3(0.0, 3.8, 2.0),

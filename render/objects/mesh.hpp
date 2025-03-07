@@ -16,7 +16,7 @@ class Mesh : public Object {
 
         Mesh ();
         Mesh (vector<Vec3> vertices, vector<array<size_t, 3>> triangles, Material mat);
-        Mesh (string obj_filename);
+        Mesh (string obj_filename, Material mat);
 
         const Intersection get_intersection(Ray r) override;
         void translate(Vec3 translation_vector) override;
