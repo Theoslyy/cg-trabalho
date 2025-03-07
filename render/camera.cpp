@@ -147,7 +147,7 @@ void Camera::draw_rows(Scene scene, int start, int end, Vec3 dx, Vec3 dy, Vec3 p
                         Intersection light_intersection = obj->get_intersection(raio_luz);
                         if (light_intersection.shape != closest_intersection.shape 
                         && light_intersection.t >= 0.0001 && 
-                        (light->type != Light::Directional && light_intersection.t <= 0.9999)) { // o truque da distância da interseção ser < 1 não vale pra
+                        (light->type != Light::Directional || light_intersection.t <= 0.9999)) { // o truque da distância da interseção ser < 1 não vale pra
                             goto next_light;                                                     // luz direcional, pq é como se ela estivesse no infinito
                         }
                     }
