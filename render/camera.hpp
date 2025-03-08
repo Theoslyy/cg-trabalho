@@ -44,8 +44,6 @@ struct Camera {
     void look_at(Vec3 point, Vec3 up);
     void set_frame_size(double width, double height);
     void set_frame_distance(double d);
-    double get_fov();
-    double set_fov(double fov);
     Intersection send_ray(Scene scene, int x, int y);
 
 private:
