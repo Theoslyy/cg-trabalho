@@ -140,17 +140,13 @@ int main() {
     // Decidir como será a iluminação
     // Um cubo.. presente.. será?
     Scene scene = Scene(ambient_light);
-    // scene.add_object(sphere);
-    // scene.add_object(cilinder);
-    // scene.add_object(cone);
-    //scene.add_object(plane);
-    //scene.add_object(plane2);
-     // House structure (walls and floor)
-    scene.add_object(new Plane(Vec3(5, 0, 5), Vec3(0, 1, 0), chao_mat)); // chaão
+    
+     // Estrutura da casa: 
+    scene.add_object(new Plane(Vec3(5, 0, 5), Vec3(0, 1, 0), chao_mat)); // chão
     scene.add_object(new Plane(Vec3(0, 2.5, 5), Vec3(1, 0, 0), parede_mat)); // parede esquerda
     scene.add_object(new Plane(Vec3(10, 2.5, 5), Vec3(-1, 0, 0), parede_mat)); // parede direita
     scene.add_object(new Plane(Vec3(5, 2.5, 0), Vec3(0, 0, 1), parede_mat)); // parede de trás
-    scene.add_object(new Plane(Vec3(5, 2.5, 10), Vec3(0, 0, -1), parede_mat)); // parade da frente 
+    scene.add_object(new Plane(Vec3(5, 2.5, 10), Vec3(0, 0, -1), parede_mat)); // parede da frente 
 
     // teto/ceu
     scene.add_object(new Plane(Vec3(5, 10, 5), Vec3(0, -1, 0), ceu_mat));
