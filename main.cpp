@@ -1,3 +1,5 @@
+#define SDL_MAIN_HANDLED
+
 #include <cstddef>
 #include <cmath>
 #include <chrono>
@@ -23,6 +25,7 @@
 #include "render/objects/cilinder.hpp"
 #include "render/objects/cone.hpp"
 #include "render/texture.hpp"
+
 
 
 using namespace std;
