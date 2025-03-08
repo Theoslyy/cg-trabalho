@@ -32,61 +32,29 @@ double degreesToRadians(double degrees) {
 }
 
 int main() {
-    Vec3 p0 = Vec3(0,0,5);
+    //posição de camera inicial para estar dentro do quarto da cena:
+    Vec3 p0 = Vec3(5,2,8);
     
+    //definições gerais da janela
     double aspect_ratio = 16.0/9.0;
     double viewport_width = 6.4;
     double viewport_height = viewport_width/aspect_ratio;
     double viewport_distance = 2.0;
     int image_width = 960;
     int image_height = image_width/aspect_ratio;
-
-    double sphere_radius = 1.0;
-    Vec3 sphere_center = Vec3(2.0,0.0, -3.0);
-
-    Vec3 plane_p0 = Vec3(0.0, -1.8, 0.0);
-    Vec3 plane_normal = Vec3(0.0, 1.0, 0.0);
-
-    Vec3 plane2_p0 = Vec3(0.0, 0.0, -6.0);
-    Vec3 plane2_normal = Vec3(0.0, 0.0, 1.0);
-    
     Vec3 bg_color = Vec3(0.0, 0.0, 0.0);
-    Material mat_sphere = Material(
-        Vec3(0.7, 0.2, 0.2),
-        Vec3(0.7, 0.2, 0.2),
-        Vec3(0.7, 0.2, 0.2),
-        100
-    );
-    Material mat_p1 = Material(
-        Vec3(0.2, 0.7, 0.2),
-        Vec3(0.2, 0.7, 0.2),
-        Vec3(0.0, 0.0, 0.0),
-        1
-    );
-    Material mat_p2 = Material(
-        Vec3(0.3, 0.3, 0.7),
-        Vec3(0.3, 0.3, 0.7),
-        Vec3(0.0, 0.0, 0.0),
-        1
-    );
-    Material mat_white = Material(
-        Vec3(0.8, 0.8, 0.8),
-        Vec3(0.8, 0.8, 0.8),
-        Vec3(0.8, 0.8, 0.8),
-        10
-    );
-
-    Texture beach_ball = Texture("beach_ball.png");
-    Texture uv_test = Texture("bw.png");
-
-    Sphere* sphere = new Sphere(sphere_center, sphere_radius, mat_white, &beach_ball);
-    Plane* plane = new Plane(plane_p0, plane_normal, mat_white, &uv_test, 4, 4);
     
-    Plane* plane2 = new Plane(plane2_p0, plane2_normal, mat_p2);
-    Cilinder* cilinder = new Cilinder(0.7, 2.0, Vec3(-2.0,-1,-3.0), Vec3(0.0,1.0,1.0), mat_sphere, true, true);
-    Cone* cone = new Cone(1.0, 2.0, Vec3(0,-1,-3.0), Vec3(0.0,1.0,0.0), mat_sphere, true);
+    // Definindo os materais a serem usados na cena:
+    Material parede_mat(Vec3(0.5, 0.5, 0.5), Vec3(0.6, 0.6, 0.6), Vec3(0.2, 0.2, 0.2), 10.0);
+    Material chao_mat(Vec3(0.3, 0.3, 0.3), Vec3(0.5, 0.5, 0.5), Vec3(0.1, 0.1, 0.1), 5.0);
+    Material ceu_mat(Vec3(0, 0, 0), Vec3(0, 0, 0), Vec3(0, 0, 0), 1.0);
+    Material arvore_base_mat(Vec3(0.4, 0.2, 0), Vec3(0.5, 0.3, 0.1), Vec3(0.1, 0.1, 0.1), 5.0);
+    Material arvore_mat(Vec3(0, 0.5, 0), Vec3(0, 0.6, 0), Vec3(0.1, 0.1, 0.1), 10.0);
+    Material bola_verme_mat(Vec3(1, 0, 0), Vec3(1, 0.2, 0.2), Vec3(0.5, 0.5, 0.5), 20.0);
+    Material bola_azul_mat(Vec3(0, 0, 1), Vec3(0.2, 0.2, 1), Vec3(0.5, 0.5, 0.5), 20.0);
+    Material bola_amar_mat(Vec3(1, 1, 0), Vec3(1, 1, 0.2), Vec3(0.5, 0.5, 0.5), 20.0);
 
-
+    // Definindo os pontos e material da estrela:
     Material mat_star = Material(
         Vec3(1.0, 0.68, 0.05),
         Vec3(1.0, 0.68, 0.05),
@@ -128,7 +96,9 @@ int main() {
         {6,11, 1}, {6, 1, 7}, {6, 7, 2}, {6, 2, 8}, {6, 8, 3}, {6, 3, 9}, {6, 9, 4}, {6, 4, 10}, {6, 10, 5}, {6, 5, 11}
     };
     
-    Mesh* cube = new Mesh(vertices, triangles, mat_star);
+    Mesh* star = new Mesh(vertices, triangles, mat_star);
+
+    // Cubo obsoleto: 
     // Mesh* cube = Mesh::cube(mat_sphere);
     // cube->translate(Vec3(-0.0,-1.0,0));
     // Mesh* cube = new Mesh("teapot400.obj", mat_sphere);
@@ -137,14 +107,16 @@ int main() {
     //     * TransformationMatrix::scale_matrix(2.0, 0.5, 0.5) 
     // );
 
+    
+    // Definindo algumas luzes:
     Light point_light = Light::point(
-        Vec3(0.0, 3.8, 2.0),
-        Vec3(1.0, 1.0, 1.0),
-        1.0
+        Vec3(5, 8, 5), 
+        Vec3(0.6, 0.6, 0.6), 
+        1
     );
 
     Light spotlight = Light::spotlight(
-        Vec3(0.0, 3.8, 0.0),
+        Vec3(5, 8, 5),
         Vec3(0.0, 1.0, 0.0),
         degreesToRadians(30),
         Vec3(1.0, 1.0, 1.0),
@@ -158,22 +130,52 @@ int main() {
         1.0
     );
 
-    Vec3 ambient_light = Vec3(0.3, 0.3, 0.3); // propriedade da cena
+    Vec3 ambient_light = Vec3(0.2, 0.2, 0.2); // propriedade da cena
 
     Camera camera = Camera(p0, viewport_width, viewport_height, image_width, image_height, viewport_distance, bg_color);
-
+    //Definindo cena:
+    //TO-DOS: 
+    // Ajustar as bolas e a textura tanto dos planos quanto das esferas
+    // A arvore ainda está flutuando!
+    // Decidir como será a iluminação
+    // Um cubo.. presente.. será?
     Scene scene = Scene(ambient_light);
     // scene.add_object(sphere);
-    scene.add_object(cube);
     // scene.add_object(cilinder);
     // scene.add_object(cone);
-    scene.add_object(plane);
-    scene.add_object(plane2);
+    //scene.add_object(plane);
+    //scene.add_object(plane2);
+     // House structure (walls and floor)
+    scene.add_object(new Plane(Vec3(5, 0, 5), Vec3(0, 1, 0), chao_mat)); // chaão
+    scene.add_object(new Plane(Vec3(0, 2.5, 5), Vec3(1, 0, 0), parede_mat)); // parede esquerda
+    scene.add_object(new Plane(Vec3(10, 2.5, 5), Vec3(-1, 0, 0), parede_mat)); // parede direita
+    scene.add_object(new Plane(Vec3(5, 2.5, 0), Vec3(0, 0, 1), parede_mat)); // parede de trás
+    scene.add_object(new Plane(Vec3(5, 2.5, 10), Vec3(0, 0, -1), parede_mat)); // parade da frente 
 
-    // scene.add_light(&point_light);
+    // teto/ceu
+    scene.add_object(new Plane(Vec3(5, 10, 5), Vec3(0, -1, 0), ceu_mat));
+ 
+     // arvore de natal
+     scene.add_object(new Cilinder(0.5, 1, Vec3(5, 0.5, 5), Vec3(0, 1, 0), arvore_base_mat, true, true)); // tronco da arvore
+     scene.add_object(new Cone(1.5, 3, Vec3(5, 1.5, 5), Vec3(0, 1, 0), arvore_mat, true)); // arvore
+     
+     // bolas!
+     scene.add_object(new Sphere(Vec3(4.5, 2, 6.5), 0.2, bola_verme_mat));
+     scene.add_object(new Sphere(Vec3(5.5, 2.5, 6.5), 0.2, bola_azul_mat));
+     scene.add_object(new Sphere(Vec3(5, 2.2, 6.5), 0.2, bola_amar_mat));
+    
+    // Aplicando translação na estrela para posiciona-la na arvore
+    scene.add_object(star);
+    star->translate(Vec3(5, 4.5, 5));
+    scene.add_object(star);
+
+    // Luz
+    //scene.add_light(&point_light);
     scene.add_light(&spotlight);
 
-    // camera.look_at(sphere_center, Vec3::AXIS_Y);
+    // Olhando para a estrela
+    camera.look_at(Vec3(5,4.5,5), Vec3::AXIS_Y);
+
 
     // SDL init
     SDL_Init(SDL_INIT_VIDEO);
