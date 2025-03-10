@@ -155,13 +155,15 @@ int main() {
     scene.add_object(new Plane(Vec3(5, 10, 5), Vec3(0, -1, 0), ceu_mat));
  
      // arvore de natal
-     scene.add_object(new Cilinder(0.5, 1, Vec3(5, 0.5, 5), Vec3(0, 1, 0), arvore_base_mat, true, true)); // tronco da arvore
-     scene.add_object(new Cone(1.5, 3, Vec3(5, 1.5, 5), Vec3(0, 1, 0), arvore_mat, true)); // arvore
-     
+     scene.add_object(new Cilinder(0.5, 1, Vec3(5, 0., 5), Vec3(0, 1, 0), arvore_base_mat, true, true)); // tronco da arvore
+     scene.add_object(new Cone(1.0, 1.5, Vec3(5, 3, 5), Vec3(0, 1, 0), arvore_mat, true)); // arvore
+     scene.add_object(new Cone(1.25, 2, Vec3(5, 2, 5), Vec3(0, 1, 0), arvore_mat, true)); // arvore
+     scene.add_object(new Cone(1.5, 2.5, Vec3(5, 1, 5), Vec3(0, 1, 0), arvore_mat, true)); // arvore
+
      // bolas!
-     scene.add_object(new Sphere(Vec3(4.5, 2, 6.5), 0.2, bola_verme_mat));
-     scene.add_object(new Sphere(Vec3(5.5, 2.5, 6.5), 0.2, bola_azul_mat));
-     scene.add_object(new Sphere(Vec3(5, 2.2, 6.5), 0.2, bola_amar_mat));
+     scene.add_object(new Sphere(Vec3(4.5, 1.4, 6.1), 0.2, bola_verme_mat));
+     scene.add_object(new Sphere(Vec3(5.5, 3, 5.8), 0.2, bola_azul_mat));
+     scene.add_object(new Sphere(Vec3(5, 2.2, 6), 0.2, bola_amar_mat));
     
     // Aplicando translação na estrela para posiciona-la na arvore
     scene.add_object(star);
