@@ -38,7 +38,7 @@ double degreesToRadians(double degrees) {
 int main() {
     // Posição de câmera inicial para estar dentro do quarto da cena:
     Vec3 p0 = Vec3(5, 2, 8);
-
+    //Vec3 p0 = Vec3(0, 0, 0);
     // Definições gerais da janela
     double aspect_ratio = 16.0 / 9.0;
     double viewport_width = 6.4;
@@ -49,14 +49,23 @@ int main() {
     Vec3 bg_color = Vec3(0.0, 0.0, 0.0);
 
     // Definindo os materiais a serem usados na cena:
-    Material parede_mat(Vec3(0.5, 0.5, 0.5), Vec3(0.6, 0.6, 0.6), Vec3(0.2, 0.2, 0.2), 10.0);
-    Material chao_mat(Vec3(0.3, 0.3, 0.3), Vec3(0.5, 0.5, 0.5), Vec3(0.1, 0.1, 0.1), 5.0);
-    Material ceu_mat(Vec3(0, 0, 0), Vec3(0, 0, 0), Vec3(0, 0, 0), 1.0);
     Material arvore_base_mat(Vec3(0.4, 0.2, 0), Vec3(0.5, 0.3, 0.1), Vec3(0.1, 0.1, 0.1), 5.0);
     Material arvore_mat(Vec3(0, 0.5, 0), Vec3(0, 0.6, 0), Vec3(0.1, 0.1, 0.1), 10.0);
-    Material bola_verme_mat(Vec3(1, 0, 0), Vec3(1, 0.2, 0.2), Vec3(0.5, 0.5, 0.5), 20.0);
-    Material bola_azul_mat(Vec3(0, 0, 1), Vec3(0.2, 0.2, 1), Vec3(0.5, 0.5, 0.5), 20.0);
-    Material bola_amar_mat(Vec3(1, 1, 0), Vec3(1, 1, 0.2), Vec3(0.5, 0.5, 0.5), 20.0);
+    Material mat_white = Material(
+        Vec3(0.8, 0.8, 0.8),
+        Vec3(0.8, 0.8, 0.8),
+        Vec3(0.8, 0.8, 0.8),
+        10
+    );
+
+    // Texturas:
+    Texture vermelho_bola = Texture("red.jpg");
+    Texture amarelo_bola = Texture("gold.jpg");
+    Texture azul_bola = Texture("blue.jpg");
+    Texture ceu = Texture("sky.jpg");
+    Texture chao = Texture("chao.jpg");
+    Texture parede = Texture("wall.png");
+    Texture snow = Texture("snow.jpg");
 
     // Definindo os pontos e material da estrela:
     Material mat_star = Material(
@@ -129,14 +138,14 @@ int main() {
     Scene scene = Scene(ambient_light);
 
     // Estrutura da casa:
-    scene.add_object(new Plane(Vec3(5, 0, 5), Vec3(0, 1, 0), chao_mat)); // chão
-    scene.add_object(new Plane(Vec3(0, 2.5, 5), Vec3(1, 0, 0), parede_mat)); // parede esquerda
-    scene.add_object(new Plane(Vec3(10, 2.5, 5), Vec3(-1, 0, 0), parede_mat)); // parede direita
-    scene.add_object(new Plane(Vec3(5, 2.5, 0), Vec3(0, 0, 1), parede_mat)); // parede de trás
-    scene.add_object(new Plane(Vec3(5, 2.5, 10), Vec3(0, 0, -1), parede_mat)); // parede da frente
+    scene.add_object(new Plane(Vec3(5, 0, 5), Vec3(0, 1, 0), mat_white, &snow, 4, 4)); // chão
+    //scene.add_object(new Plane(Vec3(0, 2.5, 5), Vec3(1, 0, 0), mat_white, &parede, 4, 4)); // parede esquerda
+    //scene.add_object(new Plane(Vec3(10, 2.5, 5), Vec3(-1, 0, 0), mat_white, &parede, 4, 4)); // parede direita
+    //scene.add_object(new Plane(Vec3(5, 2.5, 0), Vec3(0, 0, 1), mat_white, &parede, 4, 4)); // parede de trás
+    //scene.add_object(new Plane(Vec3(5, 2.5, 10), Vec3(0, 0, -1), mat_white, &parede, 4, 4)); // parede da frente
 
     // teto/ceu
-    scene.add_object(new Plane(Vec3(5, 10, 5), Vec3(0, -1, 0), ceu_mat));
+    scene.add_object(new Plane(Vec3(5, 10, 5), Vec3(0, -1, 0), mat_white, &ceu, 1, 1));
 
     // arvore de natal
     scene.add_object(new Cilinder(0.5, 1, Vec3(5, 0., 5), Vec3(0, 1, 0), arvore_base_mat, true, true)); // tronco da arvore
@@ -145,9 +154,9 @@ int main() {
     scene.add_object(new Cone(1.5, 2.5, Vec3(5, 1, 5), Vec3(0, 1, 0), arvore_mat, true)); // arvore
 
     // bolas!
-    scene.add_object(new Sphere(Vec3(4.5, 1.4, 6.1), 0.2, bola_verme_mat));
-    scene.add_object(new Sphere(Vec3(5.5, 3, 5.8), 0.2, bola_azul_mat));
-    scene.add_object(new Sphere(Vec3(5, 2.2, 6), 0.2, bola_amar_mat));
+    scene.add_object(new Sphere(Vec3(4.5, 1.4, 6.1), 0.2, mat_white, &vermelho_bola));
+    scene.add_object(new Sphere(Vec3(5.5, 3, 5.8), 0.2, mat_white, &azul_bola));
+    scene.add_object(new Sphere(Vec3(5, 2.2, 6), 0.2, mat_white, &amarelo_bola));
 
     // Aplicando translação na estrela para posiciona-la na arvore
     scene.add_object(star);
