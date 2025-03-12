@@ -23,8 +23,8 @@ Texture::Texture(SDL_Surface* surface) {
 }
 
 Vec3 Texture::sample(double u, double v) const {
-    uint32_t x = static_cast<uint32_t>(u * width);
-    uint32_t y = static_cast<uint32_t>(v * height);
+    uint32_t x = static_cast<uint32_t>(floor(u * width));
+    uint32_t y = static_cast<uint32_t>(floor(v * height));
 
     size_t index = (y * pitch + x * bpp);
     uint8_t r = texture_data[index];

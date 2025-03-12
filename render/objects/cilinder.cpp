@@ -9,6 +9,7 @@
 Cilinder::Cilinder(double r, double h, Vec3 cb, Vec3 dc, Material mat, bool has_base, bool has_top) 
     : Object(mat), radius(r), height(h), cb(cb), dc(dc.normalized()), ct(cb + h * dc.normalized()), has_base(has_base), has_top(has_top) {}
 
+    
 void Cilinder::translate(Vec3 translation_vector) {
     cb += translation_vector;
     ct += translation_vector;
@@ -18,6 +19,10 @@ void Cilinder::transform(TransformationMatrix m) {
     cb = m * cb;
     ct = m * ct;
     dc = (ct - cb).normalized();
+}
+
+Vec3 Cilinder::calculate_center() {
+    return (cb + ct) / 2.0; // Ponto médio entre a base e o topo
 }
 
 const Intersection Cilinder::get_intersection(Ray ray) {

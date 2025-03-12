@@ -11,9 +11,13 @@ Sphere::Sphere (Vec3 center, double radius, Material mat) :
 Sphere::Sphere (Vec3 center, double radius, Material mat, Texture* texture) :
     Object(mat), center(center), radius(radius), has_texture(true), texture(texture) {}
 
-void Sphere::transform(TransformationMatrix m) {this->center = m * this->center;}
+    void Sphere::transform(TransformationMatrix m) {this->center = m * this->center;}
 
 void Sphere::translate(Vec3 translation_vector) { this->center += translation_vector; }
+
+Vec3 Sphere::calculate_center() {
+    return center; // O centro da esfera já é conhecido
+}
 
 const Intersection Sphere::get_intersection(Ray r) {
     Vec3 v = center - r.origin;

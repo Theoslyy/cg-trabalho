@@ -43,6 +43,14 @@ Mesh::Mesh(string obj_filename, Material mat) : Object(mat) {
     calculate_bounding_box(); // Calculate the bounding box after loading the mesh
 }
 
+Vec3 Mesh::calculate_center() {
+    Vec3 center(0, 0, 0);
+    for (const auto& vertex : vertices) {
+        center = center + vertex;
+    }
+    return center / vertices.size(); // Média dos vértices
+}
+
 void Mesh::calculate_bounding_box() {
     Vec3 min_v = Vec3(INFINITY, INFINITY, INFINITY);
     Vec3 max_v = Vec3(-INFINITY, -INFINITY, -INFINITY);

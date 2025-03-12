@@ -137,74 +137,77 @@ public:
     }
 
     // Scale matrix
-    static TransformationMatrix scale_matrix(double sx, double sy, double sz) {
-        return TransformationMatrix({
+    static TransformationMatrix scale_matrix(double sx, double sy, double sz, Vec3 pivot) {
+        return translation_matrix(pivot.x, pivot.y, pivot.z) * TransformationMatrix({
             {sx, 0.0, 0.0, 0.0},
             {0.0, sy, 0.0, 0.0},
             {0.0, 0.0, sz, 0.0},
             {0.0, 0.0, 0.0, 1.0}
-        });
+        }) * translation_matrix(-pivot.x, -pivot.y, - pivot.z);
     }
 
     // Shear matrix along x-axis
-    static TransformationMatrix shear_matrix_x(double sh_yz, double sh_zy) {
-        return TransformationMatrix({
+    static TransformationMatrix shear_matrix_x(double sh_yz, double sh_zy, Vec3 pivot) {
+        return translation_matrix(pivot.x, pivot.y, pivot.z) * TransformationMatrix({
             {1.0, sh_yz, sh_zy, 0.0},
             {0.0, 1.0, 0.0, 0.0},
             {0.0, 0.0, 1.0, 0.0},
             {0.0, 0.0, 0.0, 1.0}
-        });
+        }) * translation_matrix(-pivot.x, -pivot.y, -pivot.z);
     }
 
     // Shear matrix along y-axis
-    static TransformationMatrix shear_matrix_y(double sh_xz, double sh_zx) {
-        return TransformationMatrix({
+    static TransformationMatrix shear_matrix_y(double sh_xz, double sh_zx, Vec3 pivot) {
+        return translation_matrix(pivot.x, pivot.y, pivot.z) * TransformationMatrix({
             {1.0, 0.0, 0.0, 0.0},
             {sh_xz, 1.0, sh_zx, 0.0},
             {0.0, 0.0, 1.0, 0.0},
             {0.0, 0.0, 0.0, 1.0}
-        });
+        }) * translation_matrix(-pivot.x, -pivot.y, -pivot.z);
     }
 
     // Shear matrix along z-axis
-    static TransformationMatrix shear_matrix_z(double sh_xy, double sh_yx) {
-        return TransformationMatrix({
+    static TransformationMatrix shear_matrix_z(double sh_xy, double sh_yx, Vec3 pivot) {
+        return translation_matrix(pivot.x, pivot.y, pivot.z) * TransformationMatrix({
             {1.0, 0.0, 0.0, 0.0},
             {0.0, 1.0, 0.0, 0.0},
             {sh_xy, sh_yx, 1.0, 0.0},
             {0.0, 0.0, 0.0, 1.0}
-        });
+        }) * translation_matrix(-pivot.x, -pivot.y, -pivot.z);
     }
 
     // Shear matrix along x-axis based on angle
-    static TransformationMatrix shear_matrix_x_angle(double angle) {
-        double sh_yz = tan(angle);
-        return shear_matrix_x(sh_yz, 0.0);
+    static TransformationMatrix shear_matrix_x_angle(double angle_yz, double angle_zy, Vec3 pivot) {
+        double sh_yz = tan(degreesToRadians(angle_yz));
+        double sh_zy = tan(degreesToRadians(angle_zy));
+        return shear_matrix_x(sh_yz, sh_zy, pivot);
     }
 
     // Shear matrix along y-axis based on angle
-    static TransformationMatrix shear_matrix_y_angle(double angle) {
-        double sh_xz = tan(angle);
-        return shear_matrix_y(sh_xz, 0.0);
+    static TransformationMatrix shear_matrix_y_angle(double angle_xz, double angle_zx, Vec3 pivot) {
+        double sh_xz = tan(degreesToRadians(angle_xz));
+        double sh_zx = tan(degreesToRadians(angle_zx));
+        return shear_matrix_y(sh_xz, sh_zx, pivot);
     }
 
     // Shear matrix along z-axis based on angle
-    static TransformationMatrix shear_matrix_z_angle(double angle) {
-        double sh_xy = tan(angle);
-        return shear_matrix_z(sh_xy, 0.0);
+    static TransformationMatrix shear_matrix_z_angle(double angle_xy, double angle_yx, Vec3 pivot) {
+        double sh_xy = tan(degreesToRadians(angle_xy));
+        double sh_yx = tan(degreesToRadians(angle_yx));
+        return shear_matrix_z(sh_xy, sh_yx, pivot);
     }
 
     // Rotation around an arbitrary axis
-    static TransformationMatrix rotation_around_axis(const Vec3& axis, double angle) {
+    static TransformationMatrix rotation_around_axis(const Vec3& axis, double angle, Vec3 pivot) {
         Vec3 normalized_axis = axis.normalized();
         double x = normalized_axis.x;
         double y = normalized_axis.y;
         double z = normalized_axis.z;
-        double cos_theta = cos(angle);
-        double sin_theta = sin(angle);
+        double cos_theta = cos(degreesToRadians(angle));
+        double sin_theta = sin(degreesToRadians(angle));
         double one_minus_cos = 1.0 - cos_theta;
 
-        return TransformationMatrix({
+        return translation_matrix(pivot.x, pivot.y, pivot.z) * TransformationMatrix({
             {
                 cos_theta + x * x * one_minus_cos,
                 x * y * one_minus_cos - z * sin_theta,
@@ -224,11 +227,48 @@ public:
                 0.0
             },
             {0.0, 0.0, 0.0, 1.0}
-        });
+        }) * translation_matrix(-pivot.x, -pivot.y, -pivot.z);
     }
+
+    static TransformationMatrix reflection_matrix(const Vec3& pc, const Vec3& normal) {
+        Vec3 u = normal.normalized();
+
+        TransformationMatrix householder_matrix;
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                if (i == j) {
+                    householder_matrix.m[i][j] = 1.0;
+                } else {
+                    householder_matrix.m[i][j] = 0.0;
+                }
+            }
+        }
+
+        householder_matrix.m[0][0] -= 2.0 * u.x * u.x;
+        householder_matrix.m[0][1] -= 2.0 * u.x * u.y;
+        householder_matrix.m[0][2] -= 2.0 * u.x * u.z;
+        householder_matrix.m[1][0] -= 2.0 * u.y * u.x;
+        householder_matrix.m[1][1] -= 2.0 * u.y * u.y;
+        householder_matrix.m[1][2] -= 2.0 * u.y * u.z;
+        householder_matrix.m[2][0] -= 2.0 * u.z * u.x;
+        householder_matrix.m[2][1] -= 2.0 * u.z * u.y;
+        householder_matrix.m[2][2] -= 2.0 * u.z * u.z;
+
+        return translation_matrix(pc.x, pc.y, pc.z) * householder_matrix * translation_matrix(-pc.x, -pc.y, -pc.z);
+    }
+    
+    private: 
+        // Function to convert degrees to radians
+        static double degreesToRadians(double degrees) {
+            return degrees * (M_PI / 180.0);
+        }
+
+        // Function to convert radians to degrees
+        static double radiansToDegrees(double radians) {
+            return radians * (180.0 / M_PI);
+        }
 };
 
-// Define the identity matrix for TransformationMatrix
 inline const TransformationMatrix TransformationMatrix::I = TransformationMatrix({
     {1.0, 0.0, 0.0, 0.0},
     {0.0, 1.0, 0.0, 0.0},

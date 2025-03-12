@@ -57,9 +57,9 @@ Intersection Camera::send_ray(Scene scene, int x, int y) {
             break;
         case OBLIQUE:
             dr = -coord_system[2];
-            if (angle_oblique.x != 0.0) { dr = TransformationMatrix::rotation_around_axis(coord_system[0], angle_oblique.x) * dr; }
-            if (angle_oblique.y != 0.0) { dr = TransformationMatrix::rotation_around_axis(coord_system[1], angle_oblique.y) * dr; }
-            if (angle_oblique.y != 0.0) { dr = TransformationMatrix::rotation_around_axis(coord_system[2], angle_oblique.y) * dr; }
+            if (angle_oblique.x != 0.0) { dr = TransformationMatrix::rotation_around_axis(coord_system[0], angle_oblique.x, Vec3::NULL_VEC) * dr; }
+            if (angle_oblique.y != 0.0) { dr = TransformationMatrix::rotation_around_axis(coord_system[1], angle_oblique.y, Vec3::NULL_VEC) * dr; }
+            if (angle_oblique.y != 0.0) { dr = TransformationMatrix::rotation_around_axis(coord_system[2], angle_oblique.y, Vec3::NULL_VEC) * dr; }
             r = Ray(p_row_col, dr);
             break;
     }
@@ -105,9 +105,9 @@ void Camera::draw_rows(Scene scene, int start, int end, Vec3 dx, Vec3 dy, Vec3 p
                     break;
                 case OBLIQUE:
                     dr = -coord_system[2];
-                    if (angle_oblique.x != 0.0) { dr = TransformationMatrix::rotation_around_axis(coord_system[0], angle_oblique.x) * dr; }
-                    if (angle_oblique.y != 0.0) { dr = TransformationMatrix::rotation_around_axis(coord_system[1], angle_oblique.y) * dr; }
-                    if (angle_oblique.y != 0.0) { dr = TransformationMatrix::rotation_around_axis(coord_system[2], angle_oblique.y) * dr; }
+                    if (angle_oblique.x != 0.0) { dr = TransformationMatrix::rotation_around_axis(coord_system[0], angle_oblique.x, Vec3::NULL_VEC) * dr; }
+                    if (angle_oblique.y != 0.0) { dr = TransformationMatrix::rotation_around_axis(coord_system[1], angle_oblique.y, Vec3::NULL_VEC) * dr; }
+                    if (angle_oblique.y != 0.0) { dr = TransformationMatrix::rotation_around_axis(coord_system[2], angle_oblique.y, Vec3::NULL_VEC) * dr; }
                     r = Ray(p_row_col, dr);
                     break;
             }
@@ -190,7 +190,7 @@ void Camera::translate(Vec3 translation_vector) { this->p_eye += translation_vec
 void Camera::set_position(Vec3 position) { this->p_eye = position; }
 
 void Camera::rotate(Vec3 rotation_axis, double angle) {
-    TransformationMatrix m = TransformationMatrix::rotation_around_axis(rotation_axis, angle);
+    TransformationMatrix m = TransformationMatrix::rotation_around_axis(rotation_axis, angle, Vec3::NULL_VEC);
     for (int i = 0; i < 3; i++) {
         coord_system[i] = m * coord_system[i];
     }
@@ -205,6 +205,7 @@ void Camera::transform(TransformationMatrix matrix) {
 
 void Camera::look_at(Vec3 point, Vec3 up) {
     // Calculate the forward direction (view direction)
+    up = (up - p_eye).normalized();
     Vec3 forward = (point - p_eye).normalized();
     
     // Calculate the right direction

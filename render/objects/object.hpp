@@ -16,4 +16,5 @@ class Object {
         virtual ~Object() {} // Declare the destructor as virtual
         virtual void translate(Vec3 translation_vector) = 0;
         virtual void transform(TransformationMatrix m) = 0;
+        virtual Vec3 calculate_center() = 0;
 };

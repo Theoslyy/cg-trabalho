@@ -14,6 +14,10 @@ void Plane::translate(Vec3 translation_vector) { this->p0 += translation_vector;
 
 void Plane::transform(TransformationMatrix m) { this->p0 = m * this->p0; }
 
+Vec3 Plane::calculate_center() {
+    return p0; // Retorna o ponto de referência do plano como o centro
+}
+
 Intersection const Plane::get_intersection(Ray r) {
     double top = normal.dot(r.origin - p0);
     double bottom = normal.dot(r.dr);
@@ -25,18 +29,17 @@ Intersection const Plane::get_intersection(Ray r) {
     Vec3 color(1, 1, 1); // Default color
     if (has_texture) {
         // Calculate basis vectors
-        Vec3 basis1 = (normal.cross(Vec3(1, 0, 0))).normalized(); // First basis vector
-        if (basis1.magnitude() < 1e-6) { // If the normal is aligned with x-axis, use y-axis
-            basis1 = (normal.cross(Vec3(0, 1, 0))).normalized();
+        Vec3 basis1 = (normal.cross(Vec3(0, 1, 0)));
+        if (basis1.magnitude() < 1e-6) { // If the normal is aligned with y-axis, use x-axis
+            basis1 = (normal.cross(Vec3(1, 0, 0))); // First basis vector
         }
+        basis1 = basis1.normalized();
         Vec3 basis2 = normal.cross(basis1); // Second basis vector
 
         // Calculate texture coordinates
         double u = (p - p0).dot(basis1) / y_texture_scale; // eixo z
         double v = (p - p0).dot(basis2) / x_texture_scale; // eixo x
 
-        // Normalize u and v if necessary (depends on your texture size)
-        // For example, if your texture is 1x1 unit:
         u = u - floor(u); // Wrap around to [0, 1]
         v = v - floor(v); // Wrap around to [0, 1]
 

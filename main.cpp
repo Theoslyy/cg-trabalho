@@ -59,13 +59,13 @@ int main() {
     );
 
     // Texturas:
-    Texture vermelho_bola = Texture("red.jpg");
-    Texture amarelo_bola = Texture("gold.jpg");
-    Texture azul_bola = Texture("blue.jpg");
-    Texture ceu = Texture("sky.jpg");
-    Texture chao = Texture("chao.jpg");
+    Texture vermelho_bola = Texture("red.png");
+    Texture amarelo_bola = Texture("gold.png");
+    Texture azul_bola = Texture("blue.png");
+    Texture ceu = Texture("sky.png");
+    Texture chao = Texture("chao.png");
     Texture parede = Texture("wall.png");
-    Texture snow = Texture("snow.jpg");
+    Texture snow = Texture("snow.png");
 
     // Definindo os pontos e material da estrela:
     Material mat_star = Material(
@@ -112,11 +112,11 @@ int main() {
     Mesh* star = new Mesh(vertices, triangles, mat_star);
 
     // Definindo algumas luzes:
-    Light point_light = Light::point(
-        Vec3(5, 8, 5),
-        Vec3(0.6, 0.6, 0.6),
-        1
-    );
+    // Light point_light = Light::point(
+    //     Vec3(5, 8, 5),
+    //     Vec3(0.6, 0.6, 0.6),
+    //     1
+    // );
 
     Light spotlight = Light::spotlight(
         Vec3(5, 8, 5),
@@ -126,11 +126,11 @@ int main() {
         1.0
     );
 
-    Light directional_light = Light::directional(
-        Vec3(0.0, 1.0, 0.0),
-        Vec3(1.0, 1.0, 1.0),
-        1.0
-    );
+    // Light directional_light = Light::directional(
+    //     Vec3(0.0, 1.0, 0.0),
+    //     Vec3(1.0, 1.0, 1.0),
+    //     1.0
+    // );
 
     Vec3 ambient_light = Vec3(0.2, 0.2, 0.2); // propriedade da cena
 
@@ -139,13 +139,13 @@ int main() {
 
     // Estrutura da casa:
     scene.add_object(new Plane(Vec3(5, 0, 5), Vec3(0, 1, 0), mat_white, &snow, 4, 4)); // chão
-    //scene.add_object(new Plane(Vec3(0, 2.5, 5), Vec3(1, 0, 0), mat_white, &parede, 4, 4)); // parede esquerda
-    //scene.add_object(new Plane(Vec3(10, 2.5, 5), Vec3(-1, 0, 0), mat_white, &parede, 4, 4)); // parede direita
-    //scene.add_object(new Plane(Vec3(5, 2.5, 0), Vec3(0, 0, 1), mat_white, &parede, 4, 4)); // parede de trás
-    //scene.add_object(new Plane(Vec3(5, 2.5, 10), Vec3(0, 0, -1), mat_white, &parede, 4, 4)); // parede da frente
+    scene.add_object(new Plane(Vec3(0, 2.5, 5), Vec3(1, 0, 0), mat_white, &parede, 4, 4)); // parede esquerda
+    scene.add_object(new Plane(Vec3(10, 2.5, 5), Vec3(-1, 0, 0), mat_white, &parede, 4, 4)); // parede direita
+    scene.add_object(new Plane(Vec3(5, 2.5, 0), Vec3(0, 0, 1), mat_white, &parede, 4, 4)); // parede de trás
+    scene.add_object(new Plane(Vec3(5, 2.5, 10), Vec3(0, 0, -1), mat_white, &parede, 4, 4)); // parede da frente
 
     // teto/ceu
-    scene.add_object(new Plane(Vec3(5, 10, 5), Vec3(0, -1, 0), mat_white, &ceu, 1, 1));
+    scene.add_object(new Plane(Vec3(5, 10, 5), Vec3(0, -1, 0), mat_white, &ceu, 8, 8));
 
     // arvore de natal
     scene.add_object(new Cilinder(0.5, 1, Vec3(5, 0., 5), Vec3(0, 1, 0), arvore_base_mat, true, true)); // tronco da arvore
@@ -166,7 +166,7 @@ int main() {
     scene.add_light(&spotlight);
 
     // Olhando para a estrela
-    camera.look_at(Vec3(5, 4.5, 5), Vec3::AXIS_Y);
+    camera.look_at(Vec3(5, 4.5, 5), camera.p_eye + Vec3::AXIS_Y);
 
     // SDL init
     SDL_Init(SDL_INIT_VIDEO);
@@ -175,7 +175,7 @@ int main() {
 
     // main loop
     SDL_Event event;
-    auto fpsTimer = std::chrono::high_resolution_clock::now();
+    // auto fpsTimer = std::chrono::high_resolution_clock::now();
     while (true) {
         // event handler
         while (SDL_PollEvent(&event) != 0) {
@@ -206,22 +206,22 @@ int main() {
                         break;
                     // Rotation
                     case SDLK_LEFT:
-                        camera.rotate(Vec3::AXIS_Y, 0.1);
+                        camera.rotate(Vec3::AXIS_Y, 2);
                         break;
                     case SDLK_RIGHT:
-                        camera.rotate(Vec3::AXIS_Y, -0.1);
+                        camera.rotate(Vec3::AXIS_Y, -2);
                         break;
                     case SDLK_UP:
-                        camera.rotate(camera.coord_system[0], 0.1);
+                        camera.rotate(camera.coord_system[0], 2);
                         break;
                     case SDLK_DOWN:
-                        camera.rotate(camera.coord_system[0], -0.1);
+                        camera.rotate(camera.coord_system[0], -2);
                         break;
                     case SDLK_q:
-                        camera.rotate(camera.coord_system[2], 0.1);
+                        camera.rotate(camera.coord_system[2], 2);
                         break;
                     case SDLK_e:
-                        camera.rotate(camera.coord_system[2], -0.1);
+                        camera.rotate(camera.coord_system[2], -2);
                         break;
                     // FOV / distancia focal
                     case SDLK_EQUALS:
@@ -240,28 +240,51 @@ int main() {
                     case SDLK_3:
                         camera.projection_type = Camera::OBLIQUE;     // muda a projeção pra obliqua
                         break;
+                    case SDLK_l: { //Tecla 'L' para definir o look_at pelo terminal
+                        double lx, ly, lz;
+                        double ux, uy, uz;
+                        printf("COORDENADAS DA CÂMERA: X %.2f | Y %.2f | Z %.2f\n", camera.p_eye.x, camera.p_eye.y, camera.p_eye.z);
+                        std::cout << "Digite as coordenadas do look_at (x y z): ";
+                        std::cin >> lx >> ly >> lz;
+                        std::cin.clear();
+                        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+                        std::cout << "Digite as coordenadas do up (x y z): ";
+                        std::cin >> ux >> uy >> uz;
+                        std::cin.clear();
+                        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+                        camera.look_at(Vec3(lx, ly, lz), Vec3(ux, uy, uz));
+                        std::cout << "Look_at definido para (" << lx << ", " << ly << ", " << lz << ")" << std::endl;
+                        break;   
+                    }
                 }
             } else if (event.type == SDL_MOUSEBUTTONDOWN) {
                 int mouseX = event.button.x;
                 int mouseY = event.button.y;
 
-                if (event.button.button == SDL_BUTTON_LEFT) {
+                if (event.button.button == SDL_BUTTON_MIDDLE) {
                     Intersection i = camera.send_ray(scene, mouseX, mouseY);
                     if (i.t != INFINITY) {
-                        camera.look_at(i.p, Vec3::AXIS_Y); // olha pro ponto que o usuario clicou
+                        camera.look_at(i.p, camera.p_eye + Vec3::AXIS_Y); // olha pro ponto que o usuario clicou
                     }
                 } else if (event.button.button == SDL_BUTTON_RIGHT) {
                     // Usa a função pick para detectar colisão
                     Object* selectedObject = pick(camera, scene, mouseX, mouseY);
 
                     if (selectedObject != nullptr) {
-                        std::cout << "Objeto selecionado!" << std::endl;
+                        Vec3 c = selectedObject->calculate_center();
+                        printf("Centro do objeto selecionado: X %.2f | Y %.2f | Z %.2f\n", c.x, c.y, c.z);
 
                         // menu de transformações
                         std::cout << "Escolha a transformação" << std::endl;
                         std::cout << "1. Translação" << std::endl;
                         std::cout << "2. Rotação" << std::endl;
-                        std::cout << "3. Cancelar" << std::endl;
+                        std::cout << "3. Escala" << std::endl;
+                        std::cout << "4. Cisalhamento" << std::endl;
+                        std::cout << "5. Cisalhamento (por ângulo)" << std::endl;
+                        std::cout << "6. Espelhamento" << std::endl;
+                        std::cout << "7. Cancelar" << std::endl;
 
                         int choice;
                         std::cin >> choice;
@@ -277,23 +300,126 @@ int main() {
                                 std::cout << "Translação aplicada!" << std::endl;
                                 break;
                             }
-
+                            
                             case 2: { // Rotação
                                 double angle;
                                 double ax, ay, az;
+                                double cx, cy, cz;
                                 std::cout << "Digite o eixo de rotação (x y z): ";
                                 std::cin >> ax >> ay >> az; 
                                 std::cout << "Digite o ângulo de rotação (em graus): ";
                                 std::cin >> angle;
+                                std::cout << "Digite as coordenadas do pivot (x y z): ";
+                                std::cin >> cx >> cy >> cz; 
                                 double angleRadians = degreesToRadians(angle);
-                                TransformationMatrix m = TransformationMatrix::rotation_around_axis(Vec3(ax,ay,az), angleRadians);
+                                Vec3 pivot = Vec3(cx, cy, cz);
+                                TransformationMatrix m = TransformationMatrix::rotation_around_axis(Vec3(ax, ay, az), angleRadians, pivot);
                                 selectedObject->transform(m);
                                 std::cout << "Rotação aplicada!" << std::endl;
                                 break;
                             }
-                            case 3: // Cancelar
+                        
+                            case 3: { // Escala
+                                double sx, sy, sz;
+                                double cx, cy, cz;
+                                std::cout << "Digite os valores de escala (x y z): ";
+                                std::cin >> sx >> sy >> sz;
+                                std::cout << "Digite as coordenadas do pivot (x y z): ";
+                                std::cin >> cx >> cy >> cz; 
+                                Vec3 pivot = Vec3(cx, cy, cz);
+                                TransformationMatrix m = TransformationMatrix::scale_matrix(sx, sy, sz, pivot);
+                                selectedObject->transform(m);
+                                std::cout << "Escala aplicada!" << std::endl;
+                                break;
+                            }
+                        
+                            case 4: { // Cisalhamento
+                                int axis;
+                                double sh1, sh2;
+                                double cx, cy, cz;
+                                std::cout << "Escolha o eixo de cisalhamento (1: X, 2: Y, 3: Z): ";
+                                std::cin >> axis;
+                                std::cout << "Digite os valores de cisalhamento (sh1 sh2): ";
+                                std::cin >> sh1 >> sh2;
+                                
+                                std::cout << "Digite as coordenadas do pivot (x y z): ";
+                                std::cin >> cx >> cy >> cz; 
+                                Vec3 pivot = Vec3(cx, cy, cz);
+                        
+                                TransformationMatrix m;
+                                switch (axis) {
+                                    case 1:
+                                        m = TransformationMatrix::shear_matrix_x(sh1, sh2, pivot);
+                                        break;
+                                    case 2:
+                                        m = TransformationMatrix::shear_matrix_y(sh1, sh2, pivot);
+                                        break;
+                                    case 3:
+                                        m = TransformationMatrix::shear_matrix_z(sh1, sh2, pivot);
+                                        break;
+                                    default:
+                                        std::cout << "Eixo inválido!" << std::endl;
+                                        break;
+                                }
+                                selectedObject->transform(m);
+                                std::cout << "Cisalhamento aplicado!" << std::endl;
+                                break;
+                            }
+
+                            case 5: { // Cisalhamento (ângulo)
+                                int axis;
+                                double sh1, sh2;
+                                double cx, cy, cz;
+                                std::cout << "Escolha o eixo de cisalhamento (1: X, 2: Y, 3: Z): ";
+                                std::cin >> axis;
+                                std::cout << "Digite os ângulos de cisalhamento (sh1 sh2): ";
+                                std::cin >> sh1 >> sh2;
+                                
+                                std::cout << "Digite as coordenadas do pivot (x y z): ";
+                                std::cin >> cx >> cy >> cz; 
+                                Vec3 pivot = Vec3(cx, cy, cz);
+                        
+                                TransformationMatrix m;
+                                switch (axis) {
+                                    case 1:
+                                        m = TransformationMatrix::shear_matrix_x_angle(sh1, sh2, pivot);
+                                        break;
+                                    case 2:
+                                        m = TransformationMatrix::shear_matrix_y_angle(sh1, sh2, pivot);
+                                        break;
+                                    case 3:
+                                        m = TransformationMatrix::shear_matrix_z_angle(sh1, sh2, pivot);
+                                        break;
+                                    default:
+                                        std::cout << "Eixo inválido!" << std::endl;
+                                        break;
+                                }
+                                selectedObject->transform(m);
+                                std::cout << "Cisalhamento aplicado!" << std::endl;
+                                break;
+                            }
+                        
+                            case 6: { // Espelhamento
+                                double px, py, pz;
+                                double cx, cy, cz;
+                                std::cout << "Digite o ponto conhecido do espelho (x y z): ";
+                                std::cin >> px >> py >> pz;
+
+                                std::cout << "Digite o vetor normal do espelho (x y z): ";
+                                std::cin >> cx >> cy >> cz; 
+                                Vec3 normal = Vec3(cx, cy, cz);
+                        
+                                TransformationMatrix m;
+                                m = TransformationMatrix::reflection_matrix(Vec3(px, py, pz), normal);
+                                selectedObject->transform(m);
+                                std::cout << "Espelhamento aplicado!" << std::endl;
+                                break;
+                            }
+                        
+                            case 7: // Cancelar
                                 std::cout << "Operação cancelada." << std::endl;
                                 break;
+                        
                             default:
                                 std::cout << "Opção inválida!" << std::endl;
                                 break;
@@ -306,18 +432,18 @@ int main() {
             }
         }
 
-        auto startTime = std::chrono::high_resolution_clock::now();
+        // auto startTime = std::chrono::high_resolution_clock::now();
         camera.draw_scene(surface, scene);
         SDL_UpdateWindowSurface(window);
-        auto endTime = std::chrono::high_resolution_clock::now();
+        // auto endTime = std::chrono::high_resolution_clock::now();
 
         // printa o FPS no terminal a cada 1s
-        auto printTime = endTime - fpsTimer;
-        if (printTime >= std::chrono::seconds(1)) {
-            std::chrono::duration<double> lastFrameTime = endTime - startTime;
-            printf("FPS: %.1f | frame_time: %.2fs\n", 1.0 / lastFrameTime.count(), lastFrameTime.count());
-            fpsTimer = std::chrono::high_resolution_clock::now(); // reseta o timer
-        }
+        // auto printTime = endTime - fpsTimer;
+        // if (printTime >= std::chrono::seconds(1)) {
+        //     std::chrono::duration<double> lastFrameTime = endTime - startTime;
+        //     printf("FPS: %.1f | frame_time: %.2fs\n", 1.0 / lastFrameTime.count(), lastFrameTime.count());
+        //     fpsTimer = std::chrono::high_resolution_clock::now(); // reseta o timer
+        // }
     }
     quit:
     SDL_DestroyWindow(window);

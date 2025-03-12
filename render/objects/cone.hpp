@@ -13,6 +13,7 @@ public:
     const Intersection get_intersection(Ray ray) override;
     void translate(Vec3 translation_vector) override;
     void transform(TransformationMatrix m) override;
+    Vec3 calculate_center() override;
 
 private:
     double radius;

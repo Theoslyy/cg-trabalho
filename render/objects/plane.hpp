@@ -19,4 +19,5 @@ class Plane : public Object {
         const Intersection get_intersection(Ray r) override;
         void translate(Vec3 translation_vector) override;
         void transform(TransformationMatrix m) override;
+        Vec3 calculate_center() override;
 };

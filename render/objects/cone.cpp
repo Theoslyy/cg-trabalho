@@ -16,6 +16,10 @@ void Cone::transform(TransformationMatrix m) {
     dc = (apex - cb).normalized();
 }
 
+Vec3 Cone::calculate_center() {
+    return (apex + cb) / 2.0; // Ponto médio entre o vértice e o centro da base
+}
+
 const Intersection Cone::get_intersection(Ray ray) {
     Intersection closest_intersection = Intersection();
 
