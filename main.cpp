@@ -37,8 +37,13 @@ double degreesToRadians(double degrees) {
 
 int main() {
     // Posição de câmera inicial para estar dentro do quarto da cena:
-    Vec3 p0 = Vec3(5, 2, 8);
+    //Vec3 p0 = Vec3(5, 2, 8);
+    // 3 pontos de fuga:
+    //Vec3 p0 = Vec3(2,4,4);
+    // Coordenada zero:
     //Vec3 p0 = Vec3(0, 0, 0);
+    // Coordenada topo estrela:
+    Vec3 p0 = Vec3(5, 8, 5);
     // Definições gerais da janela
     double aspect_ratio = 16.0 / 9.0;
     double viewport_width = 6.4;
@@ -64,7 +69,7 @@ int main() {
     Texture azul_bola = Texture("blue.png");
     Texture ceu = Texture("sky.png");
     Texture chao = Texture("chao.png");
-    Texture parede = Texture("wall.png");
+    Texture parede = Texture("wall.jpg");
     Texture snow = Texture("snow.png");
 
     // Definindo os pontos e material da estrela:
@@ -72,6 +77,12 @@ int main() {
         Vec3(1.0, 0.68, 0.05),
         Vec3(1.0, 0.68, 0.05),
         Vec3(1.0, 0.68, 0.05),
+        10
+    );
+    Material mat_cubo = Material(
+        Vec3(1., 0., 0.),
+        Vec3(1., 0., 0.),
+        Vec3(1., 0., 0.),
         10
     );
 
@@ -103,20 +114,44 @@ int main() {
         Vec3(-x4, y4, 0), // pentagono interior esq baixo
         Vec3(-x3, y3, 0), // pentagono interior esq cima
     };
+    vector<Vec3> vertices_cubo = {
+        Vec3(-0.5, -0.5, -0.5),
+        Vec3( 0.5, -0.5, -0.5),
+        Vec3(-0.5,  0.5, -0.5),
+        Vec3( 0.5,  0.5, -0.5),
+        Vec3(-0.5, -0.5,  0.5),
+        Vec3( 0.5, -0.5,  0.5),
+        Vec3(-0.5,  0.5,  0.5),
+        Vec3( 0.5,  0.5,  0.5),
+    };
 
     vector<array<size_t, 3>> triangles = {
         {0, 1, 11}, {0, 7, 1}, {0, 2, 7}, {0, 8, 2}, {0, 3, 8}, {0, 9, 3}, {0, 4, 9}, {0, 10, 4}, {0, 5, 10}, {0, 11, 5},
         {6, 11, 1}, {6, 1, 7}, {6, 7, 2}, {6, 2, 8}, {6, 8, 3}, {6, 3, 9}, {6, 9, 4}, {6, 4, 10}, {6, 10, 5}, {6, 5, 11}
     };
+    vector<array<size_t, 3>> triangulos_cubo = {
+        // Back face
+        {2, 1, 0}, {1, 2, 3},
+        // Left face
+        {6, 2, 0}, {6, 0, 4},
+        // Right face
+        {3, 5, 1}, {3, 7, 5},
+        // Front face
+        {4, 5, 6}, {7, 6, 5},
+        // Top face
+        {6, 3, 2}, {6, 7, 3},
+        // Bottom face
+        {0, 1, 5}, {0, 5, 4},
+    };
 
     Mesh* star = new Mesh(vertices, triangles, mat_star);
-
+    Mesh* cubo = new Mesh(vertices_cubo, triangulos_cubo, mat_cubo);
     // Definindo algumas luzes:
-    // Light point_light = Light::point(
-    //     Vec3(5, 8, 5),
-    //     Vec3(0.6, 0.6, 0.6),
-    //     1
-    // );
+     Light point_light = Light::point(
+         Vec3(5, 8, 5),
+         Vec3(0.6, 0.6, 0.6),
+         1
+     );
 
     Light spotlight = Light::spotlight(
         Vec3(5, 8, 5),
@@ -126,11 +161,11 @@ int main() {
         1.0
     );
 
-    // Light directional_light = Light::directional(
-    //     Vec3(0.0, 1.0, 0.0),
-    //     Vec3(1.0, 1.0, 1.0),
-    //     1.0
-    // );
+     Light directional_light = Light::directional(
+         Vec3(0.0, 1.0, 0.0),
+         Vec3(1.0, 1.0, 1.0),
+         1.0
+     );
 
     Vec3 ambient_light = Vec3(0.2, 0.2, 0.2); // propriedade da cena
 
@@ -161,12 +196,18 @@ int main() {
     // Aplicando translação na estrela para posiciona-la na arvore
     scene.add_object(star);
     star->translate(Vec3(5, 4.5, 5));
+    scene.add_object(cubo);
+    cubo->translate(Vec3(4.5, 0., 6));
 
     // Luz
-    scene.add_light(&spotlight);
+    //scene.add_light(&spotlight);
+    scene.add_light(&point_light);
 
     // Olhando para a estrela
-    camera.look_at(Vec3(5, 4.5, 5), camera.p_eye + Vec3::AXIS_Y);
+    camera.look_at(Vec3(5, 4.5, 5), camera.p_eye + Vec3::AXIS_X);
+
+    // Olhando para o cubo
+    //camera.look_at(Vec3(3,3,3), camera.p_eye + Vec3::AXIS_Y); 
 
     // SDL init
     SDL_Init(SDL_INIT_VIDEO);
@@ -263,7 +304,7 @@ int main() {
                 int mouseX = event.button.x;
                 int mouseY = event.button.y;
 
-                if (event.button.button == SDL_BUTTON_MIDDLE) {
+                if (event.button.button == SDL_BUTTON_LEFT) {
                     Intersection i = camera.send_ray(scene, mouseX, mouseY);
                     if (i.t != INFINITY) {
                         camera.look_at(i.p, camera.p_eye + Vec3::AXIS_Y); // olha pro ponto que o usuario clicou
@@ -277,12 +318,12 @@ int main() {
                         printf("Centro do objeto selecionado: X %.2f | Y %.2f | Z %.2f\n", c.x, c.y, c.z);
 
                         // menu de transformações
-                        std::cout << "Escolha a transformação" << std::endl;
-                        std::cout << "1. Translação" << std::endl;
-                        std::cout << "2. Rotação" << std::endl;
+                        std::cout << "Escolha a transformacao" << std::endl;
+                        std::cout << "1. Translacao" << std::endl;
+                        std::cout << "2. Rotacao" << std::endl;
                         std::cout << "3. Escala" << std::endl;
                         std::cout << "4. Cisalhamento" << std::endl;
-                        std::cout << "5. Cisalhamento (por ângulo)" << std::endl;
+                        std::cout << "5. Cisalhamento (por angulo)" << std::endl;
                         std::cout << "6. Espelhamento" << std::endl;
                         std::cout << "7. Cancelar" << std::endl;
 
@@ -294,10 +335,10 @@ int main() {
                         switch (choice) {
                             case 1: { // Translação
                                 double tx, ty, tz;
-                                std::cout << "Digite os valores de translação (x y z): ";
+                                std::cout << "Digite os valores de translcao (x y z): ";
                                 std::cin >> tx >> ty >> tz;
                                 selectedObject->translate(Vec3(tx, ty, tz));
-                                std::cout << "Translação aplicada!" << std::endl;
+                                std::cout << "Translacao aplicada!" << std::endl;
                                 break;
                             }
                             
@@ -305,16 +346,16 @@ int main() {
                                 double angle;
                                 double ax, ay, az;
                                 double cx, cy, cz;
-                                std::cout << "Digite o eixo de rotação (x y z): ";
+                                std::cout << "Digite o eixo de rotacao (x y z): ";
                                 std::cin >> ax >> ay >> az; 
-                                std::cout << "Digite o ângulo de rotação (em graus): ";
+                                std::cout << "Digite o angulo de rotação (em graus): ";
                                 std::cin >> angle;
                                 std::cout << "Digite as coordenadas do pivot (x y z): ";
                                 std::cin >> cx >> cy >> cz; 
                                 Vec3 pivot = Vec3(cx, cy, cz);
                                 TransformationMatrix m = TransformationMatrix::rotation_around_axis(Vec3(ax, ay, az), angle, pivot);
                                 selectedObject->transform(m);
-                                std::cout << "Rotação aplicada!" << std::endl;
+                                std::cout << "Rotacao aplicada!" << std::endl;
                                 break;
                             }
                         
@@ -357,7 +398,7 @@ int main() {
                                         m = TransformationMatrix::shear_matrix_z(sh1, sh2, pivot);
                                         break;
                                     default:
-                                        std::cout << "Eixo inválido!" << std::endl;
+                                        std::cout << "Eixo invalido!" << std::endl;
                                         break;
                                 }
                                 selectedObject->transform(m);
@@ -371,7 +412,7 @@ int main() {
                                 double cx, cy, cz;
                                 std::cout << "Escolha o eixo de cisalhamento (1: X, 2: Y, 3: Z): ";
                                 std::cin >> axis;
-                                std::cout << "Digite os ângulos de cisalhamento (sh1 sh2): ";
+                                std::cout << "Digite os angulos de cisalhamento (sh1 sh2): ";
                                 std::cin >> sh1 >> sh2;
                                 
                                 std::cout << "Digite as coordenadas do pivot (x y z): ";
@@ -390,7 +431,7 @@ int main() {
                                         m = TransformationMatrix::shear_matrix_z_angle(sh1, sh2, pivot);
                                         break;
                                     default:
-                                        std::cout << "Eixo inválido!" << std::endl;
+                                        std::cout << "Eixo invalido!" << std::endl;
                                         break;
                                 }
                                 selectedObject->transform(m);
@@ -416,11 +457,11 @@ int main() {
                             }
                         
                             case 7: // Cancelar
-                                std::cout << "Operação cancelada." << std::endl;
+                                std::cout << "Operacao cancelada." << std::endl;
                                 break;
                         
                             default:
-                                std::cout << "Opção inválida!" << std::endl;
+                                std::cout << "Opcao inválida!" << std::endl;
                                 break;
                         }
 
