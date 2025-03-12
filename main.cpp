@@ -311,9 +311,8 @@ int main() {
                                 std::cin >> angle;
                                 std::cout << "Digite as coordenadas do pivot (x y z): ";
                                 std::cin >> cx >> cy >> cz; 
-                                double angleRadians = degreesToRadians(angle);
                                 Vec3 pivot = Vec3(cx, cy, cz);
-                                TransformationMatrix m = TransformationMatrix::rotation_around_axis(Vec3(ax, ay, az), angleRadians, pivot);
+                                TransformationMatrix m = TransformationMatrix::rotation_around_axis(Vec3(ax, ay, az), angle, pivot);
                                 selectedObject->transform(m);
                                 std::cout << "Rotação aplicada!" << std::endl;
                                 break;
